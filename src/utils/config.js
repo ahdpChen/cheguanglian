@@ -18,7 +18,7 @@ fly.config.baseURL = config.host
 // 添加请求拦截器
 fly.interceptors.request.use((request) => {
   // 给所有请求添加自定义header
-  request.headers['X-Tag'] = 'flyio'
+  // request.headers['X-Tag'] = 'flyio'
   // 打印出请求体
   // console.log(request.body)
   // 终止请求

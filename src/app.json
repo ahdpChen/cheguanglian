@@ -1,7 +1,8 @@
 {
   "pages": [
-    "pages/home/main",
+    "pages/startApp/main",
     "pages/login/main",
+    "pages/home/main",
     "pages/index/main",
     "pages/logs/main",
     "pages/counter/main"
