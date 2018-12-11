@@ -29,10 +29,10 @@ export default {
         }
       })
     },
-    redirect () {
+    reLaunchPage () {
       console.log('redirect')
       const url = '../home/main'
-      wx.redirectTo({ url })
+      wx.reLaunch({ url })
     }
   },
   created () {
@@ -41,7 +41,7 @@ export default {
   },
   mounted () {
     setTimeout(() => {
-      this.redirect()
+      this.reLaunchPage()
     }, 3000)
   }
 }
