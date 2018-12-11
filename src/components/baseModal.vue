@@ -72,7 +72,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .modal {
   display: flex;
   position: absolute;
@@ -87,7 +87,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
   }
   .modal-wrap {
     position: relative;
@@ -108,7 +108,6 @@ export default {
 
   &.position-top .modal-wrap {
     width: 100%;
-    height: 80%;
   }
 
   &.position-right {

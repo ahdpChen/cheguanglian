@@ -1,12 +1,31 @@
 {
   "pages": [
+    "pages/home/main",
     "pages/startApp/main",
     "pages/login/main",
-    "pages/home/main",
-    "pages/index/main",
-    "pages/logs/main",
-    "pages/counter/main"
+    "pages/my/main",
+    "pages/advert/main"
   ],
+  "tabBar": {
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "selectedColor": "#545DFF",
+    "color": "#EBEBEB",
+    "list": [
+      {
+        "pagePath": "pages/home/main",
+        "text": "首页",
+        "iconPath": "static/pie.png",
+        "selectedIconPath": "static/pie_active.png"
+      },
+      {
+        "pagePath": "pages/my/main",
+        "text": "我的",
+        "iconPath": "static/settings.png",
+        "selectedIconPath": "static/settings_active.png"
+      }
+    ]
+  },
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",

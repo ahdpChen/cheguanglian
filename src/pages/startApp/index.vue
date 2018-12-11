@@ -31,7 +31,7 @@ export default {
     },
     redirect () {
       console.log('redirect')
-      const url = '../login/main'
+      const url = '../home/main'
       wx.redirectTo({ url })
     }
   },
