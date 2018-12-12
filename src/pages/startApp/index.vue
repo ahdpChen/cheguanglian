@@ -1,5 +1,5 @@
 <template>
-  <div class="home-page">
+  <div class="start-page">
     <div class="logo"></div>
     <div class="copy-right">
       <p>覆盖用车生活全场景</p>
@@ -10,7 +10,7 @@
 <script>
 
 export default {
-  name: 'home',
+  name: 'start',
   data () {
     return {
       isShow: false
@@ -29,9 +29,9 @@ export default {
         }
       })
     },
-    reLaunchPage () {
-      console.log('redirect')
-      const url = '../home/main'
+    reLaunchPage (path) {
+      console.log('redirect', path)
+      const url = `../${path}/main`
       wx.reLaunch({ url })
     }
   },
@@ -43,14 +43,14 @@ export default {
     try {
       wx.setStorageSync('test', '123')
       setTimeout(() => {
-        this.reLaunchPage()
+        this.reLaunchPage('login')
       }, 3000)
     } catch (e) { console.log(e) }
   }
 }
 </script>
 <style lang="scss" scoped>
-.home-page {
+.start-page {
   position: absolute;
   top: 0;
   left: 0;

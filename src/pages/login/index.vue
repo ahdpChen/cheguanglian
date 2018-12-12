@@ -102,9 +102,17 @@ export default {
     clearVcErr () {
       this.vcErr = ''
     },
+    reLaunchPage (path) {
+      console.log('redirect', path)
+      const url = `../${path}/main`
+      wx.reLaunch({ url })
+    },
     login () {
       console.log('login', '手机号' + this.phone, '验证码' + this.verifyCode)
       this.vcErr = '验证码错误，请重新输入'
+      setTimeout(() => {
+        this.reLaunchPage('home')
+      }, 3000)
     },
     showToast () {
       this.isToast = !this.isToast

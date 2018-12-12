@@ -1,10 +1,14 @@
 {
   "pages": [
-    "pages/home/main",
     "pages/startApp/main",
-    "pages/login/main",
     "pages/my/main",
-    "pages/advert/main"
+    "pages/home/main",
+    "pages/login/main",
+    "pages/transactions/main",
+    "pages/transactionDetail/main",
+    "pages/deposit/main",
+    "pages/advert/main",
+    "pages/setup/main"
   ],
   "tabBar": {
     "backgroundColor": "#fff",

@@ -3,48 +3,49 @@
     <scroll-view
       class="scroll-container"
       scroll-y
+      enable-back-to-top
       @scroll="scroll"
-    >
-    <div class="scroll-wrap" :class="{ paddingBottom: chooseImages.length }">
-      <subTitle subTitle="上传作业图片" />
-      <div class="home-tip">
-        <ul>
-          <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
-          <li>2. 在<span @click="navigationToPage" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长</li>
-        </ul>
-      </div>
-      <div class="select-tip">选择已贴车贴</div>
-      <div :class="{ fixed: isScroll }">
-        <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
-          <div>雪花（1个月起，2019-01-30结束）</div>
-          <div class="arrow"></div>
+      >
+      <div class="scroll-wrap" :class="{ paddingBottom: chooseImages.length }">
+        <subTitle subTitle="上传作业图片" />
+        <div class="home-tip">
+          <ul>
+            <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
+            <li>2. 在<span @click="navigationToPage" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长</li>
+          </ul>
         </div>
-        <div class="car-license" v-if="chooseImages.length">
-          <div class="license-left" @click="selectLicense">
-            <span>沪</span>
+        <div class="select-tip">选择已贴车贴</div>
+        <div :class="{ fixed: isScroll }">
+          <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
+            <div>雪花（1个月起，2019-01-30结束）</div>
             <div class="arrow"></div>
           </div>
-          <div class="license-right">
-            <input type="text" :value="license" placeholder="车牌号" @input="setLicense" />
+          <div class="car-license" v-if="chooseImages.length">
+            <div class="license-left" @click="licenseIsClick">
+              <span>沪</span>
+              <div class="arrow"></div>
+            </div>
+            <div class="license-right">
+              <input type="text" :value="license" placeholder="车牌号" @input="setLicense" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="camera-wrap" @click="camera" v-if="!chooseImages.length">
-        <div>
-          <p class="title">点此广告拍照</p>
-          <p>照片中需清晰可见广告与车牌</p>
-          <p>拍照时需打开一侧车门</p>
+        <div class="camera-wrap" @click="camera" v-if="!chooseImages.length">
+          <div>
+            <p class="title">点此广告拍照</p>
+            <p>照片中需清晰可见广告与车牌</p>
+            <p>拍照时需打开一侧车门</p>
+          </div>
+          <div class="camera-icon"></div>
         </div>
-        <div class="camera-icon"></div>
-      </div>
-      <div class="choose-imgs" v-if="chooseImages.length">
-        <div class="choose-img-wrap" v-for="(src, index) in chooseImages" :key="index">
-          <img :src="src" alt="">
-          <img class="cancel-btn" src="./images/cancel.png" :data-chooseImgIndex="index" @click.stop="delImg" />
+        <div class="choose-imgs" v-if="chooseImages.length">
+          <div class="choose-img-wrap" v-for="(src, index) in chooseImages" :key="index">
+            <img :src="src" alt="">
+            <img class="cancel-btn" src="./images/cancel.png" :data-chooseImgIndex="index" @click.stop="delImg" />
+          </div>
         </div>
+        <div class="camera-extra" @click="camera" v-if="chooseImages.length && chooseImages.length < 3">+ 继续拍照</div>
       </div>
-      <div class="camera-extra" @click="camera" v-if="chooseImages.length && chooseImages.length < 3">+ 继续拍照</div>
-    </div>
     </scroll-view>
     <button class="submit" v-if="chooseImages.length">确认提交</button>
     <base-modal
@@ -54,7 +55,20 @@
       @showModal="selectIsClick"
       >
       <div class="select-container">
-        <select-options :selectOptions="selectOptions" @selectOption="selectOption" />
+        <select-options-modal :selectOptions="selectOptions" @selectOption="selectOption" />
+      </div>
+      <div class="arrow">
+        <span></span>
+      </div>
+    </base-modal>
+    <base-modal
+        customClass="license-modal"
+        position="top"
+        v-if="isLicenseClick"
+        @showModal="licenseIsClick"
+      >
+      <div class="license-container">
+        <license-options-modal :licenseOptions="licenseOptions" @licenseOption="licenseOption" />
       </div>
       <div class="arrow">
         <span></span>
@@ -63,48 +77,54 @@
   </div>
 </template>
 <script>
+import carJson from './json/carLicense.json'
 import subTitle from '@/components/subTitle'
 import baseModal from '@/components/baseModal'
-import selectOptions from './components/selectOptions'
+import selectOptionsModal from './components/selectOptions'
+import licenseOptionsModal from './components/licenseOptions'
+
 export default {
   name: 'home',
   components: {
     subTitle,
     baseModal,
-    selectOptions
+    selectOptionsModal,
+    licenseOptionsModal
   },
   data () {
     return {
       selectOptions: [
         {
           id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          name: '1雪花（1个月起，2019-01-30结束）'
         },
         {
-          id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          id: 2,
+          name: '2雪花（1个月起，2019-01-30结束）'
         },
         {
-          id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          id: 3,
+          name: '3雪花（1个月起，2019-01-30结束）'
         },
         {
-          id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          id: 4,
+          name: '4雪花（1个月起，2019-01-30结束）'
         },
         {
-          id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          id: 5,
+          name: '5雪花（1个月起，2019-01-30结束）'
         },
         {
-          id: 1,
-          name: '雪花（1个月起，2019-01-30结束）'
+          id: 6,
+          name: '6雪花（1个月起，2019-01-30结束）'
         }
       ],
+      licenseOptions: carJson.carLicense,
       chooseImages: [],
       license: '',
+      isScroll: false,
       isClick: false,
-      isScroll: false
+      isLicenseClick: false
     }
   },
   computed: {
@@ -128,9 +148,11 @@ export default {
       console.log(option)
       this.isClick = false
     },
-    selectLicense () {
-      console.log('selectLicense')
-      this.license = 'a12323'.toUpperCase()
+    licenseIsClick () {
+      this.isLicenseClick = !this.isLicenseClick
+    },
+    licenseOption () {
+      this.isLicenseClick = false
     },
     setLicense (e) {
       let { value } = e.target
@@ -238,7 +260,7 @@ export default {
     z-index: 2;
     box-sizing: border-box;
     & + .choose-imgs {
-      padding-top: 135px;
+      padding-top: 200px;
     }
   }
   .select-tip {
@@ -437,6 +459,54 @@ export default {
         width: 14px;
         height: 8px;
         background: url('./images/arrow.png') center/100% no-repeat;
+      }
+    }
+  }
+  .license-modal {
+    .modal-wrap {
+      height: 85% !important;
+      padding-bottom: 10px;
+      overflow: hidden;
+    }
+    .license-container {
+      position: relative;
+      height: 100%;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      ul {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
+        padding: 10px 20px 0;
+        box-sizing: border-box;
+        li {
+          width: 21%;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+          font-size: 14px;
+          color: #1B1B4E;
+          margin-bottom: 20px;
+          background: #fff;
+          box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
+          border-radius: 6px;
+        }
+      }
+    }
+    .arrow {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      span {
+        display: inline-block;
+        width: 14px;
+        height: 8px;
+        background: url('./images/arrow.png') center/100% no-repeat;
+        transform: rotate(180deg);
       }
     }
   }
