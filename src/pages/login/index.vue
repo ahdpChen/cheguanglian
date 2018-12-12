@@ -174,7 +174,7 @@ export default {
       border-radius: 6px;
       z-index: 1;
       &::after {
-      border: none;
+        border: none;
       }
       &.gray {
         box-shadow: none;

@@ -40,9 +40,12 @@ export default {
     this.getUserInfo()
   },
   mounted () {
-    setTimeout(() => {
-      this.reLaunchPage()
-    }, 3000)
+    try {
+      wx.setStorageSync('test', '123')
+      setTimeout(() => {
+        this.reLaunchPage()
+      }, 3000)
+    } catch (e) { console.log(e) }
   }
 }
 </script>

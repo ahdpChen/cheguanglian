@@ -1,6 +1,11 @@
 <template>
-  <div class="home-page" :class="{ overflow: isModalOpen }">
-    <div class="scroll-container">
+  <div class="home-page">
+    <scroll-view
+      class="scroll-container"
+      scroll-y
+      @scroll="scroll"
+    >
+    <div class="scroll-wrap" :class="{ paddingBottom: chooseImages.length }">
       <subTitle subTitle="上传作业图片" />
       <div class="home-tip">
         <ul>
@@ -9,11 +14,22 @@
         </ul>
       </div>
       <div class="select-tip">选择已贴车贴</div>
-      <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
-        <div>雪花（1个月起，2019-01-30结束）</div>
-        <div class="arrow"></div>
+      <div :class="{ fixed: isScroll }">
+        <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
+          <div>雪花（1个月起，2019-01-30结束）</div>
+          <div class="arrow"></div>
+        </div>
+        <div class="car-license" v-if="chooseImages.length">
+          <div class="license-left" @click="selectLicense">
+            <span>沪</span>
+            <div class="arrow"></div>
+          </div>
+          <div class="license-right">
+            <input type="text" :value="license" placeholder="车牌号" @input="setLicense" />
+          </div>
+        </div>
       </div>
-      <div class="camera-wrap" @click="camera">
+      <div class="camera-wrap" @click="camera" v-if="!chooseImages.length">
         <div>
           <p class="title">点此广告拍照</p>
           <p>照片中需清晰可见广告与车牌</p>
@@ -27,7 +43,10 @@
           <img class="cancel-btn" src="./images/cancel.png" :data-chooseImgIndex="index" @click.stop="delImg" />
         </div>
       </div>
+      <div class="camera-extra" @click="camera" v-if="chooseImages.length && chooseImages.length < 3">+ 继续拍照</div>
     </div>
+    </scroll-view>
+    <button class="submit" v-if="chooseImages.length">确认提交</button>
     <base-modal
       customClass="select-modal"
       position="top"
@@ -47,14 +66,12 @@
 import subTitle from '@/components/subTitle'
 import baseModal from '@/components/baseModal'
 import selectOptions from './components/selectOptions'
-import mptoast from 'mptoast'
 export default {
   name: 'home',
   components: {
     subTitle,
     baseModal,
-    selectOptions,
-    mptoast
+    selectOptions
   },
   data () {
     return {
@@ -85,7 +102,9 @@ export default {
         }
       ],
       chooseImages: [],
-      isClick: false
+      license: '',
+      isClick: false,
+      isScroll: false
     }
   },
   computed: {
@@ -98,12 +117,24 @@ export default {
       const url = '../advert/main'
       wx.navigateTo({ url })
     },
+    scroll (e) {
+      const { scrollTop } = e.mp.detail
+      this.isScroll = scrollTop > 249
+    },
     selectIsClick () {
       this.isClick = !this.isClick
     },
     selectOption (option) {
       console.log(option)
       this.isClick = false
+    },
+    selectLicense () {
+      console.log('selectLicense')
+      this.license = 'a12323'.toUpperCase()
+    },
+    setLicense (e) {
+      let { value } = e.target
+      this.license = value.toUpperCase()
     },
     camera () {
       let _this = this
@@ -152,15 +183,19 @@ export default {
     this.getUserInfo()
   },
   mounted () {
-    this.$mptoast('请先登陆', 2000, this.redirect)
+    try {
+      const value = wx.getStorageSync('test')
+      if (value) {
+        console.log(value)
+      }
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 </script>
 <style lang="scss">
 .home-page {
-  &.overflow {
-    overflow: hidden;
-  }
   box-sizing: border-box;
   .scroll-container {
     position: absolute;
@@ -168,10 +203,17 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 0 30px;
+    height: 100%;
     overflow-y: scroll; 
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+    .scroll-wrap {
+      padding: 0 30px;
+      box-sizing: border-box;
+      &.paddingBottom {
+        padding-bottom: 100px;
+      }
+    }
   }
   .home-tip {
     padding: 15px 0 30px;
@@ -187,6 +229,18 @@ export default {
       }
     }
   }
+  .fixed {
+    position: fixed;
+    left: 0;
+    top: 10px;
+    width: 100%;
+    padding: 0 30px;
+    z-index: 2;
+    box-sizing: border-box;
+    & + .choose-imgs {
+      padding-top: 135px;
+    }
+  }
   .select-tip {
     margin-bottom: 15px;
     line-height: 22px;
@@ -200,7 +254,7 @@ export default {
     width: 100%;
     height: 60px;
     padding: 0 20px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-size: 14px;
     background: #fff;
     box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
@@ -223,6 +277,40 @@ export default {
         height: 8px;
         background: url('./images/arrow.png') center/100% no-repeat;
         transition: transform .3s;
+      }
+    }
+  }
+  .car-license {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 60px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
+    border-radius: 10px;
+    box-sizing: border-box;
+    div {
+      font-size: 14px;
+      color: #1B1B4E;
+      &.license-left {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        .arrow {
+          width: 14px;
+          height: 8px;
+          margin-left: 10px;
+          background: url('./images/arrow.png') center/100% no-repeat;
+          box-sizing: border-box;
+        }
+      }
+      &.license-right {
+        flex: 1;
+        padding-left: 15px;
       }
     }
   }
@@ -289,6 +377,32 @@ export default {
       right: 0;
       width: 46px !important;
       height: 46px !important;
+    }
+  }
+  .camera-extra {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #545DFF;
+  }
+  .submit {
+    position: fixed;
+    left: 5%;
+    bottom: 20px;
+    width: 90%;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    font-size: 14px;
+    color: #fff;
+    background: #545DFF;
+    box-shadow: 0px 5px 15px rgba(84, 93, 255, 0.3);
+    outline: none;
+    border: none;
+    border-radius: 6px;
+    z-index: 1;
+    &::after {
+      border: none;
     }
   }
   .select-modal {
