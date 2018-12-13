@@ -144,7 +144,7 @@ export default {
             }
           }
           .arrow {
-            width: 6px;
+            width: 8px;
             height: 22px;
             margin-left: 24px;
             background: url('./images/arrow.png') center/100% no-repeat;

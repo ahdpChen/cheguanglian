@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/advert/main",
     "pages/startApp/main",
     "pages/my/main",
     "pages/home/main",
@@ -7,7 +8,6 @@
     "pages/transactions/main",
     "pages/transactionDetail/main",
     "pages/deposit/main",
-    "pages/advert/main",
     "pages/setup/main"
   ],
   "tabBar": {
