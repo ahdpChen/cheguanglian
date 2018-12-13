@@ -1,5 +1,5 @@
 const host = 'https://api-istage.haomaiche.com'
-const appid = ''
+const appid = 'wx641d418964519abb'
 const appKey = ''
 const config = {
   host,

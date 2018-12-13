@@ -1,6 +1,5 @@
 /*
     fly配置文件
-    by:David 2018.6.14
 */
 // 引入 fly
 import config from '../config/config'
@@ -45,8 +44,3 @@ fly.interceptors.response.use(
 // Vue.prototype.$http=fly //将fly实例挂在vue原型上
 
 export default fly
-// ---------------------
-// 作者：卫夫子
-// 来源：CSDN
-// 原文：https://blog.csdn.net/qq_31393401/article/details/80728523
-// 版权声明：本文为博主原创文章，转载请附上博文链接！
