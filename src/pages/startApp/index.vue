@@ -29,10 +29,10 @@ export default {
         }
       })
     },
-    reLaunchPage (path) {
-      console.log('redirect', path)
+    jumpPage (path, jumpMethod) {
+      console.log(`path:${jumpMethod}, jumpMethod:${jumpMethod}`)
       const url = `../${path}/main`
-      wx.reLaunch({ url })
+      wx[jumpMethod]({ url })
     }
   },
   created () {
@@ -43,7 +43,7 @@ export default {
     try {
       wx.setStorageSync('test', '123')
       setTimeout(() => {
-        this.reLaunchPage('login')
+        this.jumpPage('login', 'redirectTo')
       }, 3000)
     } catch (e) { console.log(e) }
   }
