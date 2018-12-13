@@ -34,6 +34,7 @@ export const get = (params) => {
 export const post = (params) => {
   return fly.post(`${host}${params.url}`, qs.stringify(params.data))
 }
+
 // 封装的登录请求，根据后台接收方式选择是否加qs.stringify
 export const login = params => {
   return fly.post('/login', params)
@@ -41,8 +42,3 @@ export const login = params => {
 export const carBrand = params => {
   return fly.get('/ware/car/car-brand/310000?&time=1544336972973&source=105')
 }
-// ---------------------
-// 作者：卫夫子
-// 来源：CSDN
-// 原文：https://blog.csdn.net/qq_31393401/article/details/80728523
-// 版权声明：本文为博主原创文章，转载请附上博文链接！
