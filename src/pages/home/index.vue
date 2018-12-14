@@ -208,7 +208,7 @@ export default {
     try {
       const value = wx.getStorageSync('test')
       if (value) {
-        console.log(value)
+        // console.log(value)
       }
     } catch (e) {
       console.log(e)
