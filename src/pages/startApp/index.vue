@@ -30,7 +30,7 @@ export default {
       })
     },
     jumpPage (path, jumpMethod) {
-      console.log(`path:${jumpMethod}, jumpMethod:${jumpMethod}`)
+      console.log(`path:${path}, jumpMethod:${jumpMethod}`)
       const url = `../${path}/main`
       wx[jumpMethod]({ url })
     }
