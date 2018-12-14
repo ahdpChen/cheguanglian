@@ -24,7 +24,7 @@
         </div>
         <div class="advert-list">
           <ul>
-            <li v-for="(advert, index) in advertList" :key="index">
+            <li v-for="(advert, index) in advertList" :key="index" @click="jumpPage(advert.advertId)">
               <div class="advert-content">
                 <div class="advert-name">{{ advert.name }}</div>
                 <p class="advert-time">{{ advert.time }}</p>
@@ -64,62 +64,57 @@ export default {
       },
       advertList: [
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         },
         {
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
+          advertId: '1',
           name: '沪GY2715|雪花',
           time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
         }
@@ -130,11 +125,15 @@ export default {
   methods: {
     scroll (e) {
       const { scrollTop } = e.mp.detail
-      console.log(scrollTop)
       this.isScroll = scrollTop > 60
     },
     changeTab (index) {
       this.advertTab.tabIndex = index
+    },
+    jumpPage (advertId) {
+      console.log(advertId)
+      const url = `../advertItem/main?advertId=${advertId}`
+      wx.navigateTo({ url })
     }
   }
 }
@@ -218,6 +217,7 @@ export default {
         align-items: center;
         justify-content: center;
         height: 60px;
+        margin-bottom: 10px;
         .advert-content {
           flex: 1;
           div,

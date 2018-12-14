@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 
+import advertItem from './module/advertItem'
+
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
@@ -18,8 +20,7 @@ const store = new Vuex.Store({
     }
   },
   actions: {
-    setLoginStatus ({ commit, state }) {
-      const isLogin = !state.isLogin
+    setLoginStatus ({ commit, state }, isLogin) {
       commit('SET_LOGIN_STATUS', isLogin)
     }
   },
@@ -31,13 +32,10 @@ const store = new Vuex.Store({
         removeItem: key => {}
       }
     })
-  ]
-
-// ---------------------
-// 作者：卫夫子
-// 来源：CSDN
-// 原文：https://blog.csdn.net/qq_31393401/article/details/80728523
-// 版权声明：本文为博主原创文章，转载请附上博文链接！
+  ],
+  modules: {
+    advertItem
+  }
 })
 
 export default store
