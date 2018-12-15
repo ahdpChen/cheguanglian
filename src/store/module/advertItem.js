@@ -12,7 +12,6 @@ const advertItem = {
       commit('SET_LOGIN_STATUS', isLogin)
     },
     setAdvertItem ({ commit, state }, advertItem) {
-      console.log('setAdvertItem', advertItem)
       commit('SET_ADVERT_DETAIL', advertItem)
     }
   }
