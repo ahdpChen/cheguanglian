@@ -1,18 +1,18 @@
 {
   "pages": [
+    "pages/my/main",
+    "pages/transactions/main",
+    "pages/transactionDetail/main",
     "pages/deposit/main",
     "pages/startApp/main",
     "pages/home/main",
     "pages/login/main",
-    "pages/my/main",
     "pages/addBankCard/main",
     "pages/setup/main",
     "pages/createAcount/main",
     "pages/advert/main",
     "pages/advertItem/main",
-    "pages/advertDetail/main",
-    "pages/transactions/main",
-    "pages/transactionDetail/main"
+    "pages/advertDetail/main"
   ],
   "tabBar": {
     "backgroundColor": "#fff",
