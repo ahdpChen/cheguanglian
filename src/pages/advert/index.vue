@@ -8,7 +8,7 @@
       >
       <div class="scroll-wrap">
         <div class="input-wrap">
-          <input type="text" placeholder="搜索车牌号/广告名" />
+          <input type="text" placeholder="搜索车牌号/广告名" @click="jumpPage('searchAdvert')" />
         </div>
         <div class="advert-tab" :class="{ fixed: isScroll }">
           <ul>
@@ -24,7 +24,7 @@
         </div>
         <div class="advert-list">
           <ul>
-            <li v-for="(advert, index) in advertList" :key="index" @click="jumpPage(advert.advertId)">
+            <li v-for="(advert, index) in advertList" :key="index" @click="jumpPage('advertItem', advert.advertId)">
               <div class="advert-content">
                 <div class="advert-name">{{ advert.name }}</div>
                 <p class="advert-time">{{ advert.time }}</p>
@@ -130,9 +130,8 @@ export default {
     changeTab (index) {
       this.advertTab.tabIndex = index
     },
-    jumpPage (advertId) {
-      console.log(advertId)
-      const url = `../advertItem/main?advertId=${advertId}`
+    jumpPage (path, advertId) {
+      const url = `../${path}/main?advertId=${advertId}`
       wx.navigateTo({ url })
     }
   }

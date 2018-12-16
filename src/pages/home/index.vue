@@ -148,7 +148,6 @@ export default {
       this.isClick = !this.isClick;
     },
     selectOption(option) {
-      console.log(option);
       this.isClick = false;
     },
     licenseIsClick() {
@@ -169,7 +168,6 @@ export default {
         sourceType: ["camera"],
         success(res) {
           if (res && res.tempFilePaths && res.tempFilePaths.length) {
-            console.log(res);
             _this.chooseImages = _this.chooseImages.concat(res.tempFilePaths);
             wx.showToast({
               title: "" + res.tempFiles[0].size,

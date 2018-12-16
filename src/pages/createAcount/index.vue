@@ -52,7 +52,6 @@ export default {
     isActive() {
       const { name, phone } = this.employData;
       const { name: originName, phone: originPhone } = this.originData;
-      console.log(phone.length === 11);
       return (
         name.length &&
         phone.length === 11 &&
@@ -72,6 +71,10 @@ export default {
         })[0] || this.employData;
       this.originData = JSON.parse(JSON.stringify(this.employData));
     }
+  },
+  onLoad() {
+    //处理二次打开页面data不会初始化
+    Object.assign(this.$data, this.$options.data())
   }
 };
 </script>

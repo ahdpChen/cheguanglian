@@ -47,13 +47,9 @@ export default {
   },
   methods: {},
   mounted() {
-    console.log(this.$root.$mp.query);
-    console.log(this.$store.state.advertItem);
     this.advertDetail = this.$store.state.advertItem.advertItem[
       this.$root.$mp.query.advertIndex
     ];
-    console.log(this.advertDetail);
-
     wx.setNavigationBarTitle({
       title: "沪GY2715"
     });

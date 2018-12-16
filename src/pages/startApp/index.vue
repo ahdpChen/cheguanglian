@@ -51,15 +51,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .start-page {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-direction: column;
+  height: 100vh;
   padding: 30% 0;
   box-sizing: border-box;
   background: #545DFF;
