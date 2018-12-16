@@ -103,16 +103,10 @@ export default {
 <style lang="scss" scoped>
 .setup-page {
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  height: 100vh;
   padding-bottom: 20px;
-  overflow: hidden;
+  box-sizing: border-box;
   .my-info {
     position: relative;
     display: flex;

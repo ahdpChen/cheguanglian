@@ -98,8 +98,6 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$root.$mp.query);
-
     wx.setNavigationBarTitle({
       title: `沪GY2715/${this.advertItem.length}次广告`
     });
