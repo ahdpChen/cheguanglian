@@ -6,7 +6,8 @@
         <div class="home-tip">
           <ul>
             <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
-            <li>2. 在
+            <li>
+              2. 在
               <span @click="navigationToPage" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
             </li>
           </ul>
@@ -54,6 +55,7 @@
       </div>
     </scroll-view>
     <button class="submit" v-if="chooseImages.length">确认提交</button>
+
     <base-modal customClass="select-modal" position="top" v-if="isClick" @showModal="selectIsClick">
       <div class="select-container">
         <select-options-modal :selectOptions="selectOptions" @selectOption="selectOption"/>

@@ -52,8 +52,12 @@ export default {
     isActive() {
       const { name, phone } = this.employData;
       const { name: originName, phone: originPhone } = this.originData;
-      console.log(phone.length === 11)
-      return name.length && phone.length === 11 && !(name === originName && phone === originPhone);
+      console.log(phone.length === 11);
+      return (
+        name.length &&
+        phone.length === 11 &&
+        !(name === originName && phone === originPhone)
+      );
     }
   },
   methods: {
