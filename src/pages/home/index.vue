@@ -50,7 +50,7 @@
         <div
           class="camera-extra"
           @click="camera"
-          v-if="chooseImages.length && chooseImages.length < 3"
+          v-if="isGoOnTakePhoto"
         >+ 继续拍照</div>
       </div>
     </scroll-view>
@@ -85,6 +85,9 @@ import subTitle from "@/components/subTitle";
 import baseModal from "@/components/baseModal";
 import selectOptionsModal from "./components/selectOptions";
 import licenseOptionsModal from "./components/licenseOptions";
+
+
+import { upLoadFile } from '@/utils/ajax'
 
 export default {
   name: "home",
@@ -125,6 +128,7 @@ export default {
       licenseOptions: carJson.carLicense,
       chooseImages: [],
       license: "",
+      isUpLoading: false,
       isScroll: false,
       isClick: false,
       isLicenseClick: false
@@ -133,6 +137,9 @@ export default {
   computed: {
     isModalOpen() {
       return !!this.isClick;
+    },
+    isGoOnTakePhoto() {
+      return !this.isUpLoading && this.chooseImages.length && this.chooseImages < 3
     }
   },
   methods: {
@@ -160,25 +167,28 @@ export default {
       let { value } = e.target;
       this.license = value.toUpperCase();
     },
-    camera() {
-      let _this = this;
-      wx.chooseImage({
-        count: 3,
-        sizeType: ["compressed"],
-        sourceType: ["camera"],
-        success(res) {
-          if (res && res.tempFilePaths && res.tempFilePaths.length) {
-            _this.chooseImages = _this.chooseImages.concat(res.tempFilePaths);
-            wx.showToast({
-              title: "" + res.tempFiles[0].size,
-              icon: "success",
-              duration: 2000
-            });
-          }
-        },
-        fail() {},
-        complete() {}
-      });
+    takePhotoPromise () {
+      return new Promise((res, rej)=> {
+        wx.chooseImage({
+          count: 1,
+          sizeType: ["compressed"],
+          sourceType: ["camera"],
+          success(data) {
+            res(data)
+          },
+          fail(err) {
+            rej(err)
+          },
+          complete() {}
+        })
+      })
+    },
+    async camera() {
+      let res = await this.takePhotoPromise();
+      if(res && res.tempFilePaths.length) {
+        const tempFilePaths = res.tempFilePaths;
+        await upLoadFile(tempFilePaths[0]);
+      }
     },
     delImg(e) {
       const { chooseimgindex } = e.target.dataset;

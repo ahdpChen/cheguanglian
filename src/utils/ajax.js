@@ -2,11 +2,10 @@ import fly from './config'
 import qs from 'qs'
 
 import config from '../config/config'
+
 const host = config.host
-// eslint-disable-next-line no-unused-vars
-const appKey = config.appKey
-// eslint-disable-next-line no-unused-vars
-const appid = config.appid
+// const appKey = config.appKey
+// const appid = config.appid
 
 /**
  * 接口模版====post
@@ -36,9 +35,19 @@ export const post = (params) => {
 }
 
 // 封装的登录请求，根据后台接收方式选择是否加qs.stringify
-export const login = params => {
-  return fly.post('/login', params)
+
+// 文件上传
+export const upLoadFile = picture => {
+  return fly.post('/file/upload', { picture })
 }
-export const carBrand = params => {
-  return fly.get('/ware/car/car-brand/310000?&time=1544336972973&source=105')
+
+// 登录
+/**
+ *
+ * @param {*} code wx.login()返回code
+ * @param {*} userphone 手机号用户输入
+ * @param {*} smCode 后台根据手机号获取
+ */
+export const login = params => {
+  return fly.post('/testApi/auth', params)
 }

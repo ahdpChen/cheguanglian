@@ -6,7 +6,7 @@ import config from '../config/config'
 var Fly = require('flyio/dist/npm/wx')
 // eslint-disable-next-line new-parens
 var fly = new Fly
-// 配置请求基地址
+
 // //定义公共headers
 // fly.config.headers={xx:5,bb:6,dd:7}
 // //设置超时
@@ -17,9 +17,12 @@ fly.config.baseURL = config.host
 // 添加请求拦截器
 fly.interceptors.request.use((request) => {
   // 给所有请求添加自定义header
-  // request.headers['X-Tag'] = 'flyio'
+  const token = wx.getStorageSync('token') || ''
+  request.headers = {
+    token
+  }
   // 打印出请求体
-  // console.log(request.body)
+  console.log(request.body)
   // 终止请求
   // var err=new Error("xxx")
   // err.request=request
@@ -41,6 +44,5 @@ fly.interceptors.response.use(
     // return Promise.resolve("ssss")
   }
 )
-// Vue.prototype.$http=fly //将fly实例挂在vue原型上
 
 export default fly
