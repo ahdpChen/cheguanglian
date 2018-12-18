@@ -1,12 +1,12 @@
 {
   "pages": [
-    "pages/deposit/main",
     "pages/startApp/main",
     "pages/login/main",
     "pages/home/main",
     "pages/my/main",
     "pages/transactions/main",
     "pages/transactionDetail/main",
+    "pages/deposit/main",
     "pages/addBankCard/main",
     "pages/advert/main",
     "pages/advertItem/main",
