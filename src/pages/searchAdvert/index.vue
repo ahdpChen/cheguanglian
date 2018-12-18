@@ -12,8 +12,14 @@
             @click="jumpPage('advertItem', advert.advertId)"
           >
             <div class="advert-content">
-              <div class="advert-name">{{ advert.name }}</div>
-              <p class="advert-time">{{ advert.time }}</p>
+              <div class="advert-name">
+                <span>{{ advert.name }}</span>
+                <span>{{ advert.workTime }}</span>
+              </div>
+              <p class="advert-time">
+                <span>{{ advert.time }}</span>
+                <span>{{ advert.desc }}</span>
+              </p>
             </div>
             <div class="arrow"></div>
           </li>
@@ -38,59 +44,67 @@ export default {
       searchText: "",
       searchResult: [
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '1',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '2',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '3',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '4',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '5',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '6',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '7',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '8',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
-        },
-        {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
-        },
-        {
-          advertId: "1",
-          name: "沪GY2715|雪花",
-          time: "2018-12-12 :12:30:20(已贴20天|最少30天)"
+          advertId: '9',
+          name: '沪GY2715|雪花',
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         }
       ]
     };
@@ -145,15 +159,17 @@ export default {
           margin-bottom: 10px;
           .advert-content {
             flex: 1;
-            div,
-            p {
+            .advert-name,
+            .advert-time {
+              display: flex;
+              justify-content: space-between;
               font-size: 14px;
               line-height: 24px;
             }
-            div {
+            .advert-name {
               color: #1b1b4e;
             }
-            p {
+            .advert-time {
               color: #aeb3c0;
             }
           }
