@@ -1,10 +1,10 @@
 <template>
   <div class="addBankCard-page">
     <div class="bankCard-info" @click="selectIsClick">
-      <div class="bank-icon" v-if="bankInfo.length">
-        <img :src="bankInfo[0].bankIcon" alt>
+      <div class="bank-icon">
+        <img :src="bankInfo[0].formateIcon" alt>
       </div>
-      <div class="bank-name" v-if="bankInfo.length">{{ bankInfo[0].bankName }}</div>
+      <div class="bank-name">{{ bankInfo[0].name }}</div>
       <div class="arrow"></div>
     </div>
     <div class="bankCard-id">
@@ -35,6 +35,7 @@
   </div>
 </template>
 <script>
+import bankCarList from "../../../static/bankCar.json";
 import baseModal from "@/components/baseModal";
 import bankCardListModal from "./components/bankCardList";
 export default {
@@ -45,32 +46,7 @@ export default {
   },
   data() {
     return {
-      bankInfo: [
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行"
-        },
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行2"
-        },
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行3"
-        },
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行4"
-        },
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行5"
-        },
-        {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行6"
-        }
-      ],
+      bankCarList: bankCarList.bankCar,
       cardInfo: {
         id: ""
       },
@@ -78,9 +54,21 @@ export default {
       isClick: false
     };
   },
+  computed: {
+    bankInfo() {
+      return this.bankCarList.map(bank => {
+        return Object.assign(bank, {
+          formateIcon: require(`~Image/images/bankCar/${bank.icon}`)
+        });
+      });
+    }
+  },
   methods: {
     selectIsClick() {
       this.isClick = !this.isClick;
+    },
+    selectOption(bank) {
+      console.log(bank);
     }
   },
   mounted() {
@@ -175,6 +163,7 @@ export default {
       overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
       ul {
+        padding-bottom: 30px;
         li {
           display: flex;
           align-items: center;
@@ -193,6 +182,40 @@ export default {
             flex: 1;
             padding-left: 20px;
             text-align: left;
+          }
+          .input-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 60px;
+            padding: 0 20px;
+            background: #fff;
+            box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
+            border-radius: 10px;
+            box-sizing: border-box;
+            label {
+              line-height: 24px;
+              font-size: 14px;
+              color: #1B1B4E;
+            }
+            input {
+              flex: 1;
+              height: 100%;
+              padding-left: 20px;
+              text-align: left;
+            }
+            .bank-car-submit {
+              line-height: 24px;
+              font-size: 14px;
+              color: #545DFF;
+              background: none;
+              outline: none;
+              border: none;
+              &::after {
+                border: none;
+              }
+            }
           }
         }
       }

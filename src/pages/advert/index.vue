@@ -26,8 +26,14 @@
           <ul>
             <li v-for="(advert, index) in advertList" :key="index" @click="jumpPage('advertItem', advert.advertId)">
               <div class="advert-content">
-                <div class="advert-name">{{ advert.name }}</div>
-                <p class="advert-time">{{ advert.time }}</p>
+                <div class="advert-name">
+                  <span>{{ advert.name }}</span>
+                  <span>{{ advert.workTime }}</span>
+                </div>
+                <p class="advert-time">
+                  <span>{{ advert.desc }}</span>
+                  <span>{{ advert.time }}</span>
+                </p>
               </div>
               <div class="arrow"></div>
             </li>
@@ -66,57 +72,65 @@ export default {
         {
           advertId: '1',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '2',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '3',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '4',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '5',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '6',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '7',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '8',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         },
         {
-          advertId: '1',
+          advertId: '9',
           name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
-          advertId: '1',
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
-        },
-        {
-          advertId: '1',
-          name: '沪GY2715|雪花',
-          time: '2018-12-12 :12:30:20(已贴20天|最少30天)'
+          workTime: '已贴20天|最少30天',
+          time: '2018-12-12 :12:30:20',
+          desc: '差2天可领取补贴'
         }
       ],
       isScroll: false
@@ -219,15 +233,17 @@ export default {
         margin-bottom: 10px;
         .advert-content {
           flex: 1;
-          div,
-          p {
+          .advert-name,
+          .advert-time {
+            display: flex;
+            justify-content: space-between;
             font-size: 14px;
             line-height: 24px;
           }
-          div {
+          .advert-name {
             color: #1B1B4E;
           }
-          p {
+          .advert-time {
             color: #AEB3C0;
           }
         }

@@ -3,7 +3,7 @@
     <div class="deposit-bank" @click="navigationToPage('addBankCard')">
       <div class="bank-empty" v-if="!bankInfo">+添加银行卡</div>
       <div class="bank-icon" v-if="bankInfo">
-        <img :src="bankInfo.bankIcon" alt>
+        <img :src="bankIcon" alt />
       </div>
       <div class="bank-name" v-if="bankInfo">{{ bankInfo.bankName }}</div>
       <div class="arrow"></div>
@@ -24,13 +24,15 @@
   </div>
 </template>
 <script>
+import bankCarList from '../../../static/bankCar.json';
 export default {
   name: "deposit",
   data() {
     return {
+      bankCarList: bankCarList.bankCar,
       bankInfo: {
-          bankIcon: require("../../../static/bank_icon.png"),
-          bankName: "中国银行"
+          bankIcon: 'bank_icon.png',
+          bankName: "中国银行1"
       },
       acountInfo: {
         avalidMoney: "10,000",
@@ -40,6 +42,13 @@ export default {
     };
   },
   computed: {
+    bankIcon() {
+      const bank = this.bankCarList.filter((bank)=> {
+        return this.bankInfo.bankName === bank.name;
+      })[0]
+      const bankIcon = bank ? bank.icon : 'bank_icon.png'
+      return require(`~Image/images/bankCar/${bankIcon}`);
+    },
     submitText() {
       return this.acountInfo.isEnabled
         ? "提现"
@@ -83,7 +92,7 @@ export default {
     padding: 0 20px;
     margin-bottom: 20px;
     font-size: 14px;
-    background: #ffffff;
+    background: #fff;
     box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
     border-radius: 10px;
     box-sizing: border-box;
