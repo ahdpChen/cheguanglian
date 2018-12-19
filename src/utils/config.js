@@ -7,8 +7,6 @@ var Fly = require('flyio/dist/npm/wx')
 // eslint-disable-next-line new-parens
 var fly = new Fly
 
-// //定义公共headers
-// fly.config.headers={xx:5,bb:6,dd:7}
 // //设置超时
 fly.config.timeout = 20000
 // //设置请求基地址
@@ -16,13 +14,29 @@ fly.config.baseURL = config.host
 
 // 添加请求拦截器
 fly.interceptors.request.use((request) => {
-  // 给所有请求添加自定义header
-  const token = wx.getStorageSync('token') || ''
-  request.headers = {
-    token
+  let auth = true
+  if (request.extra) {
+    auth = request.extra.auth
   }
+
   // 打印出请求体
-  console.log(request)
+  console.log(auth, request)
+
+  // 给所有需要token的接口请求添加token
+  if (auth) {
+    const loginInfoStr = wx.getStorageSync('LOGIN_INFO')
+    const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null
+    if (loginInfo) {
+      request.headers = {
+        Authorization: `Bearer ${loginInfo.token}`
+      }
+    } else {
+      // 统一处理没有token跳转登陆页
+      const url = '../login/main'
+      wx.redirectTo({url})
+    }
+  }
+
   // 终止请求
   // var err=new Error("xxx")
   // err.request=request
@@ -40,8 +54,8 @@ fly.interceptors.response.use(
   },
   // eslint-disable-next-line handle-callback-err
   (err) => {
-    // 发生网络错误后会走到这里
-    // return Promise.resolve("ssss")
+    // 发生网络错误
+    return Promise.reject(err)
   }
 )
 

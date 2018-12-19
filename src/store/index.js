@@ -9,19 +9,22 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    openId: '',
+    loginInfo: {},
     isLogin: false
   },
   mutations: {
-    SET_OPEN_ID: (state, openId) => {
-      state.openId = openId
+    SET_LOGIN_INFO: (state, loginInfo) => {
+      state.loginInfo = loginInfo
     },
     SET_LOGIN_STATUS: (state, isLogin) => {
       state.isLogin = isLogin
     }
   },
   actions: {
-    setLoginStatus ({ commit, state }, isLogin) {
+    setLoginInfo: ({ commit }, loginInfo) => {
+      commit('SET_LOGIN_INFO', loginInfo)
+    },
+    setLoginStatus ({ commit }, isLogin) {
       commit('SET_LOGIN_STATUS', isLogin)
     }
   },
@@ -37,7 +40,6 @@ const store = new Vuex.Store({
   modules: {
     advertItem,
     setUp
-
   }
 })
 

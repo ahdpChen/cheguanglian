@@ -2,6 +2,7 @@ import fly from './config'
 import qs from 'qs'
 
 import config from '../config/config'
+import utils from '../utils'
 
 const host = config.host
 // const appKey = config.appKey
@@ -39,14 +40,48 @@ const checkPhone = phoneNumber => {
   return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`)
 }
 
-// 文件上传
-const upLoadFile = picture => {
-  return fly.post('/file/upload', { picture })
+/**
+ * 文件上传
+ * @param {*} type为1时扫描
+ * @param {*} picture
+ */
+const upLoadFile = params => {
+  // return fly.post('/testApi/file/upload', utils.json2Form(params))
+  const loginInfoStr = wx.getStorageSync('LOGIN_INFO')
+  const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null
+  if (loginInfo) {
+    return wx.uploadFile({
+      url: `${host}/testApi/file/upload`,
+      filePath: params.picture,
+      name: 'file',
+      header: {
+        'Content-type': 'multipart/form-data',
+        'Host': 'www.cheguanglian.com:8080',
+        'Authorization': `Bearer ${loginInfo.token}`
+      },
+      formData: {
+        type: params.type
+      },
+      success (res) {
+        const data = res.data
+        console.log(data)
+      }
+    })
+  } else {
+    // 统一处理没有token跳转登陆页
+    const url = '../login/main'
+    wx.redirectTo({url})
+    return false
+  }
 }
 
 // 获取验证码
 const getMsCode = phoneNumber => {
-  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`)
+  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`, null, {
+    extra: {
+      auth: false
+    }
+  })
 }
 
 /**
@@ -56,7 +91,16 @@ const getMsCode = phoneNumber => {
  * @param {*} smCode 后台根据手机号获取
  */
 export const login = (userphone, smCode, code) => {
-  return fly.post(`/testApi/auth?username=${userphone}&code=${code}&smCode=${smCode}`)
+  return fly.post('/testApi/auth', utils.json2Form({account: userphone, code, smCode}), {
+    extra: {
+      auth: false
+    }
+  })
+}
+
+// 获取广告下拉列表
+export const getSelAd = () => {
+  return fly.get('/testApi/ad/getSelAd')
 }
 
 export default {
@@ -65,5 +109,6 @@ export default {
   upLoadFile,
   checkPhone,
   getMsCode,
-  login
+  login,
+  getSelAd
 }
