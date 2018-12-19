@@ -25,29 +25,45 @@ const host = config.host
  */
 
 // 通用的get请求
-export const get = (params) => {
+const get = (params) => {
   return fly.get(`${host}${params.url}`, qs.stringify(params.data))
 }
 
 // 通用的post请求
-export const post = (params) => {
+const post = (params) => {
   return fly.post(`${host}${params.url}`, qs.stringify(params.data))
 }
 
-// 封装的登录请求，根据后台接收方式选择是否加qs.stringify
+// 校验手机号是否在系统登记
+const checkPhone = phoneNumber => {
+  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`)
+}
 
 // 文件上传
-export const upLoadFile = picture => {
+const upLoadFile = picture => {
   return fly.post('/file/upload', { picture })
 }
 
-// 登录
+// 获取验证码
+const getMsCode = phoneNumber => {
+  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`)
+}
+
 /**
- *
+ * 登录
  * @param {*} code wx.login()返回code
  * @param {*} userphone 手机号用户输入
  * @param {*} smCode 后台根据手机号获取
  */
-export const login = params => {
-  return fly.post('/testApi/auth', params)
+export const login = (userphone, smCode, code) => {
+  return fly.post(`/testApi/auth?username=${userphone}&code=${code}&smCode=${smCode}`)
+}
+
+export default {
+  get,
+  post,
+  upLoadFile,
+  checkPhone,
+  getMsCode,
+  login
 }

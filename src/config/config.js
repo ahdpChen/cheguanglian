@@ -1,4 +1,4 @@
-let host = 'http://www.cheguanglian-test.com'
+let host = 'http://www.cheguanglian.com:8080'
 console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV === 'production') {
   host = 'http://www.cheguanglian.com'

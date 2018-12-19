@@ -22,7 +22,7 @@ fly.interceptors.request.use((request) => {
     token
   }
   // 打印出请求体
-  console.log(request.body)
+  console.log(request)
   // 终止请求
   // var err=new Error("xxx")
   // err.request=request

@@ -87,7 +87,7 @@ import selectOptionsModal from "./components/selectOptions";
 import licenseOptionsModal from "./components/licenseOptions";
 
 
-import { upLoadFile } from '@/utils/ajax'
+import api from '@/utils/ajax'
 
 export default {
   name: "home",
@@ -187,7 +187,7 @@ export default {
       let res = await this.takePhotoPromise();
       if(res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
-        await upLoadFile(tempFilePaths[0]);
+        await api.upLoadFile(tempFilePaths[0]);
       }
     },
     delImg(e) {
