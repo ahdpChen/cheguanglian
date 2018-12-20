@@ -98,9 +98,29 @@ export const login = (userphone, smCode, code) => {
   })
 }
 
-// 获取广告下拉列表
+// 首页-获取广告下拉列表
 export const getSelAd = () => {
   return fly.get('/testApi/ad/getSelAd')
+}
+
+// 首页-添加广告施工
+export const addConstruction = (carWashId, adOrderId, brand, region, carNumber, carNumberOld, picList) => {
+  return fly.post('/testApi/ad/addConstruction', {
+    detail: {
+      carWashId,
+      adOrderId,
+      brand,
+      region,
+      carNumber,
+      carNumberOld
+    },
+    picList
+  })
+}
+
+// 我的-获取一级权限用户的基本信息
+export const getUserBaseInfo = () => {
+  return fly.get('/testApi/user/userBaseInfo')
 }
 
 export default {
@@ -110,5 +130,7 @@ export default {
   checkPhone,
   getMsCode,
   login,
-  getSelAd
+  getSelAd,
+  addConstruction,
+  getUserBaseInfo
 }

@@ -55,6 +55,14 @@ fly.interceptors.response.use(
   // eslint-disable-next-line handle-callback-err
   (err) => {
     // 发生网络错误
+    console.log(err)
+    if (err && err.message) {
+      wx.showToast({
+        title: err.message || '网络错误',
+        icon: 'none',
+        duration: 2000
+      })
+    }
     return Promise.reject(err)
   }
 )

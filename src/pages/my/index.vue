@@ -1,6 +1,6 @@
 <template>
   <div class="my-page">
-    <div class="account-wrap">
+    <div class="account-wrap" v-if="isTopLevel">
       <div class="account">
         <span>账户余额</span>
         <span class="money">￥3,000</span>
@@ -10,7 +10,7 @@
         <span class="money">￥12,050</span>
       </div>
     </div>
-    <div class="operate-btn">
+    <div class="operate-btn" v-if="isTopLevel">
       <button class="transactions-btn" @click="navigationToPage('transactions')">明细</button>
       <button class="deposit-btn" @click="navigationToPage('deposit')">提现</button>
     </div>
@@ -23,7 +23,7 @@
           </div>
           <div class="arrow"></div>
         </li>
-        <li class="setup" @click="navigationToPage('setup')">
+        <li class="setup" @click="navigationToPage('setup')" v-if="isTopLevel">
           <div class="icon"></div>
           <div class="middle">
             <span>账号设置</span>
@@ -36,8 +36,24 @@
   </div>
 </template>
 <script>
+import api from "@/utils/ajax";
+
 export default {
   name: "my",
+  data() {
+    return {}
+  },
+  computed: {
+    isTopLevel() {
+      return this.$store.state.loginInfo.level === '1'
+    }
+  },
+  async onShow() {
+    if(this.isTopLevel) {
+      const res = api.getUserBaseInfo();
+      console.log(res)
+    }
+  },
   methods: {
     navigationToPage(path) {
       const url = `../${path}/main`;

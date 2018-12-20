@@ -74,18 +74,19 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["setLoginStatus"]),
+    ...mapActions(["setLoginInfo", "setLoginStatus"]),
     verifyPhone() {
       this.clearErr();
       if (this.phone.length === 11) {
         this.checkPhone();
+      }else {
+        this.isValid = false;
       }
     },
     checkPhone() {
       console.log(this.phone);
       var phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
       this.isValid = phoneReg.test(this.phone);
-      // this.phoneErr = "手机号未在系统登记";
     },
     async getVerifyCode() {
       if (!this.isValid) {
@@ -95,16 +96,24 @@ export default {
       if (this.isVerifyCodeClick) {
         return;
       }
-      console.log('getVerifyCode');
+      this.isVerifyCodeClick = true;
       const res = await api.getMsCode(this.phone);
       console.log(res);
       if (res && res.code === 200) {
         this.showToast();
-        this.isVerifyCodeClick = true;
         this.setTimeCut();
         this.verifyCodeTimer = setInterval(() => {
           this.setTimeCut();
         }, 1000);
+      } else if(res && res.message) {
+        if (res.message.indexOf("手机号不存在") > -1) {
+          this.phoneErr = "手机号未在系统登记";
+        } else {
+          this.$mptoast(res.message);
+        }
+        this.isVerifyCodeClick = false;
+      }else {
+        this.isVerifyCodeClick = false;
       }
     },
     setTimeCut() {
@@ -153,6 +162,7 @@ export default {
       const res = await api.login(phone, verifyCode, code);
       if (res && res.code === 200) {
         this.setLoginStatus(true);
+        this.setLoginInfo(res.data);
         wx.setStorageSync("LOGIN_INFO", JSON.stringify(res.data));
         this.jumpPage("home", "switchTab");
       } else if (res && res.message) {
@@ -166,7 +176,7 @@ export default {
     },
     clearErr() {
       this.phoneErr = "";
-      this.phoneErr = "";
+      this.vcErr = "";
     },
     jumpPage(path, jumpMethod) {
       const url = `../${path}/main`;

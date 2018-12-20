@@ -14,9 +14,7 @@
         <div class="select-tip">选择已贴车贴</div>
         <div :class="{ fixed: isScroll }">
           <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
-            <div
-              v-if="selectOptions.length"
-            >{{ selectAdvert.brand }} ({{selectAdvert.formateMinTimeLen}}起，{{selectAdvert.endTime}}结束)</div>
+            <div>{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</div>
             <div class="arrow"></div>
           </div>
           <div class="car-license" v-if="chooseImages.length">
@@ -38,8 +36,8 @@
           <div class="camera-icon"></div>
         </div>
         <div class="choose-imgs" v-if="chooseImages.length">
-          <div class="choose-img-wrap" v-for="(src, index) in chooseImages" :key="index">
-            <img :src="src" alt>
+          <div class="choose-img-wrap" v-for="(item, index) in chooseImages" :key="index">
+            <img :src="item.src" alt>
             <img
               class="cancel-btn"
               src="./images/cancel.png"
@@ -51,7 +49,7 @@
         <div class="camera-extra" @click="camera" v-if="isGoOnTakePhoto">+ 继续拍照</div>
       </div>
     </scroll-view>
-    <button class="submit" v-if="chooseImages.length">确认提交</button>
+    <button class="submit" v-if="chooseImages.length" @click="addConstruction">确认提交</button>
 
     <base-modal customClass="select-modal" position="top" v-if="isClick" @showModal="selectIsClick">
       <div class="select-container">
@@ -74,9 +72,12 @@
         <span></span>
       </div>
     </base-modal>
+    <mptoast/>
   </div>
 </template>
 <script>
+import mptoast from "mptoast";
+
 import carJson from "./json/carLicense.json";
 import subTitle from "@/components/subTitle";
 import baseModal from "@/components/baseModal";
@@ -89,6 +90,7 @@ import config from "../../config/config";
 export default {
   name: "home",
   components: {
+    mptoast,
     subTitle,
     baseModal,
     selectOptionsModal,
@@ -97,16 +99,17 @@ export default {
   data() {
     return {
       selectOptions: [],
-      selectAdvert: {},
+      defaultAdvert: {},
       licenseOptions: carJson.carLicense,
       chooseImages: [],
       preLicense: "沪",
       license: "",
+      scanLicense: '',
+      progress: 0,
       isUpLoading: false,
       isScroll: false,
       isClick: false,
-      isLicenseClick: false,
-      progresswidth: ''
+      isLicenseClick: false
     };
   },
   computed: {
@@ -143,6 +146,7 @@ export default {
       });
     },
     uploadFile(params) {
+      const _this = this;
       const loginInfoStr = wx.getStorageSync("LOGIN_INFO");
       const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null;
       const uploadTask = wx.uploadFile({
@@ -158,22 +162,29 @@ export default {
           type: params.type
         },
         success(res) {
-          const data = res.data;
-          console.log(data);
+          const data = JSON.parse(res.data).data;
+          _this.chooseImages[params.index].serverSrc = data.picUrl;
+          console.log(data, _this.chooseImages)
+        },
+        complete() {
+          wx.hideLoading();
+          _this.progress = 0;
         }
       });
       uploadTask.onProgressUpdate(res => {
-        console.log("上传进度", res.progress);
-        console.log("已经上传的数据长度", res.totalBytesSent);
-        console.log("预期需要上传的数据总长度", res.totalBytesExpectedToSend);
+        this.progress = res.progress;
+        wx.showLoading({
+          title: `已上传${this.progress}%`,
+        })
       });
     },
     async camera() {
       let res = await this.takePhotoPromise();
       if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
-        this.chooseImages = this.chooseImages.concat([tempFilePaths[0]]);
-        const params = { type: 1, picture: tempFilePaths[0] };
+        this.chooseImages = this.chooseImages.concat([{src: tempFilePaths[0]}]);
+
+        const params = { type: 1, picture: tempFilePaths[0], index: this.chooseImages.length - 1 };
         this.uploadFile(params);
       }
     },
@@ -190,7 +201,7 @@ export default {
     },
     selectOption(option) {
       console.log(option);
-      this.selectAdvert = option;
+      this.defaultAdvert = option;
       this.isClick = false;
     },
     licenseIsClick() {
@@ -204,6 +215,25 @@ export default {
     setLicense(e) {
       let { value } = e.target;
       this.license = value.toUpperCase();
+    },
+    async addConstruction() {
+      const { defaultAdvert, scanLicense, chooseImages } = this;
+      if(!this.license) {
+        this.$mptoast("请输入车牌号");
+      }
+      let params = {
+        detail: {
+          carWashId: this.$store.state.loginInfo.id,
+          adOrderId: defaultAdvert.id,
+          brand: defaultAdvert.brand,
+          region: this.preLicense,
+          carNumber: this.license,
+          carNumberOld: scanLicense
+        },
+        picList: chooseImages.map(img=>img.serverSrc)
+      }
+      console.log(params)
+      //const res = await api.addConstruction(params);
     }
   },
   async onShow() {
@@ -221,7 +251,7 @@ export default {
         }
         d.endTime = d.endTime.split(" ")[0];
       });
-      this.selectAdvert = res.data[0];
+      this.defaultAdvert = res.data[0];
       this.selectOptions = [].concat(res.data);
     }
   },
