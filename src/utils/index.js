@@ -7,6 +7,21 @@ const json2Form = (json) => {
   return str.join('&')
 }
 
+/** 金额格式化 */
+const formatNumberWithComma = (input) => {
+  var type = typeof input
+  var numStr = 0
+  if (type === 'number') {
+    numStr = parseInt(input).toString()
+  } else if (type === 'string') {
+    numStr = input
+  } else {
+    return
+  }
+  return numStr.replace(/(?=(?!(\b))(\d{3})+$)/g, ',')
+}
+
 export default {
-  json2Form
+  json2Form,
+  formatNumberWithComma
 }

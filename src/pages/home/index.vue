@@ -6,8 +6,8 @@
         <div class="home-tip">
           <ul>
             <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
-            <li>2. 在
-              <span @click="jumpPage('advert', 'navigateTo')" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
+            <li>
+              2. 在<span @click="jumpPage('advert', 'navigateTo')" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
             </li>
           </ul>
         </div>
@@ -104,7 +104,7 @@ export default {
       chooseImages: [],
       preLicense: "沪",
       license: "",
-      scanLicense: '',
+      scanLicense: "",
       progress: 0,
       isUpLoading: false,
       isScroll: false,
@@ -164,7 +164,10 @@ export default {
         success(res) {
           const data = JSON.parse(res.data).data;
           _this.chooseImages[params.index].serverSrc = data.picUrl;
-          console.log(data, _this.chooseImages)
+          if (data.number) {
+            _this.scanLicense = data.number;
+          }
+          console.log(data, _this.chooseImages);
         },
         complete() {
           wx.hideLoading();
@@ -174,17 +177,23 @@ export default {
       uploadTask.onProgressUpdate(res => {
         this.progress = res.progress;
         wx.showLoading({
-          title: `已上传${this.progress}%`,
-        })
+          title: `已上传${this.progress}%`
+        });
       });
     },
     async camera() {
       let res = await this.takePhotoPromise();
       if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
-        this.chooseImages = this.chooseImages.concat([{src: tempFilePaths[0]}]);
+        this.chooseImages = this.chooseImages.concat([
+          { src: tempFilePaths[0] }
+        ]);
 
-        const params = { type: 1, picture: tempFilePaths[0], index: this.chooseImages.length - 1 };
+        const params = {
+          type: 1,
+          picture: tempFilePaths[0],
+          index: this.chooseImages.length - 1
+        };
         this.uploadFile(params);
       }
     },
@@ -217,23 +226,23 @@ export default {
       this.license = value.toUpperCase();
     },
     async addConstruction() {
-      const { defaultAdvert, scanLicense, chooseImages } = this;
-      if(!this.license) {
+      const { defaultAdvert: { adOrderId, brand }, scanLicense, chooseImages } = this;
+      if (!this.license) {
         this.$mptoast("请输入车牌号");
       }
       let params = {
         detail: {
           carWashId: this.$store.state.loginInfo.id,
-          adOrderId: defaultAdvert.id,
-          brand: defaultAdvert.brand,
+          adOrderId,
+          brand,
           region: this.preLicense,
           carNumber: this.license,
           carNumberOld: scanLicense
         },
-        picList: chooseImages.map(img=>img.serverSrc)
-      }
-      console.log(params)
-      //const res = await api.addConstruction(params);
+        picList: chooseImages.map(img => img.serverSrc)
+      };
+      console.log(params);
+      const res = await api.addConstruction(params);
     }
   },
   async onShow() {

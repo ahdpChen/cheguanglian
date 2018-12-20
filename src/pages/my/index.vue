@@ -3,11 +3,11 @@
     <div class="account-wrap" v-if="isTopLevel">
       <div class="account">
         <span>账户余额</span>
-        <span class="money">￥3,000</span>
+        <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
       </div>
       <div class="total">
-        <span>总收入（1个月2天）</span>
-        <span class="money">￥12,050</span>
+        <span>总收入（{{ userBaseInfo.day }}）</span>
+        <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
       </div>
     </div>
     <div class="operate-btn" v-if="isTopLevel">
@@ -27,37 +27,57 @@
           <div class="icon"></div>
           <div class="middle">
             <span>账号设置</span>
-            <span>1个员工账号</span>
+            <span>{{ userBaseInfo.peopleNum }}个员工账号</span>
           </div>
           <div class="arrow"></div>
         </li>
       </ul>
     </div>
+    <mptoast/>
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
+import mptoast from "mptoast";
+
 import api from "@/utils/ajax";
+import utils from '@/utils'
 
 export default {
   name: "my",
+  conponents: {
+    mptoast
+  },
   data() {
-    return {}
+    return {
+      userBaseInfo: {}
+    };
   },
   computed: {
     isTopLevel() {
-      return this.$store.state.loginInfo.level === '1'
-    }
-  },
-  async onShow() {
-    if(this.isTopLevel) {
-      const res = api.getUserBaseInfo();
-      console.log(res)
+      return this.$store.state.loginInfo.level === "1";
     }
   },
   methods: {
+    ...mapActions(["setUserInfo"]),
     navigationToPage(path) {
       const url = `../${path}/main`;
       wx.navigateTo({ url });
+    }
+  },
+  async onShow() {
+    if (this.isTopLevel) {
+      const res = await api.getUserBaseInfo();
+      console.log(res);
+      if(res && res.code === 200) {
+        this.userBaseInfo = Object.assign(res.data, {
+          formateTotalAmount: utils.formatNumberWithComma(res.data.totailAmount),
+          formateTotalBalance: utils.formatNumberWithComma(res.data.totalBalance)
+        })
+        this.setUserInfo(this.userBaseInfo)
+      } else if(res && res.message === '非法操作') {
+        this.$mptoast(res.message);
+      }
     }
   }
 };

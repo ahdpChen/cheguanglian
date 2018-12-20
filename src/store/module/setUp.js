@@ -8,7 +8,7 @@ const setUp = {
     }
   },
   actions: {
-    setemployees ({ commit, state }, employees) {
+    setemployees ({ commit }, employees) {
       commit('SET_ADVERT_DETAIL', employees)
     }
   }

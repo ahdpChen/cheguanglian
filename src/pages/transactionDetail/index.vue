@@ -5,27 +5,29 @@
         <ul>
           <li>
             <span>交易金额</span>
-            <span class="amount">-￥5.00</span>
+            <span
+              class="amount"
+            >{{ selectedTransaction.type === '提现'? '-': '+' }}￥{{ selectedTransaction.formateAmount }}</span>
           </li>
           <li>
             <span>交易类型</span>
-            <span>提现</span>
+            <span>{{ selectedTransaction.type }}</span>
           </li>
           <li>
             <span>交易时间</span>
-            <span>2018-12-16 20:26:20</span>
+            <span>{{ selectedTransaction.createTime }}</span>
           </li>
           <li>
             <span>流水单号</span>
-            <span>TXGY271520181230123020</span>
+            <span>{{ selectedTransaction.flowCode }}</span>
           </li>
           <li>
             <span>银行卡</span>
-            <span>中国建设银行储蓄卡(1234)</span>
+            <span>{{ selectedTransaction.rmark }}</span>
           </li>
           <li>
             <span>状态</span>
-            <span>审核中...</span>
+            <span>{{ selectedTransaction.status }}</span>
           </li>
         </ul>
       </div>
@@ -36,7 +38,17 @@
 export default {
   name: "transactionDetail",
   data() {
-    return {};
+    return {
+      selectedTransaction: {}
+    };
+  },
+  onShow() {
+    const { id } = this.$root.$mp.query;
+    this.selectedTransaction = this.$store.state.transactions.transactionsData.filter(
+      transaction => {
+        return transaction.id === parseInt(id);
+      }
+    )[0];
   }
 };
 </script>

@@ -45,35 +45,35 @@ const checkPhone = phoneNumber => {
  * @param {*} type为1时扫描
  * @param {*} picture
  */
-const upLoadFile = params => {
-  // return fly.post('/testApi/file/upload', utils.json2Form(params))
-  const loginInfoStr = wx.getStorageSync('LOGIN_INFO')
-  const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null
-  if (loginInfo) {
-    return wx.uploadFile({
-      url: `${host}/testApi/file/upload`,
-      filePath: params.picture,
-      name: 'file',
-      header: {
-        'Content-type': 'multipart/form-data',
-        'Host': 'www.cheguanglian.com:8080',
-        'Authorization': `Bearer ${loginInfo.token}`
-      },
-      formData: {
-        type: params.type
-      },
-      success (res) {
-        const data = res.data
-        console.log(data)
-      }
-    })
-  } else {
-    // 统一处理没有token跳转登陆页
-    const url = '../login/main'
-    wx.redirectTo({url})
-    return false
-  }
-}
+// const upLoadFile = params => {
+//   // return fly.post('/testApi/file/upload', utils.json2Form(params))
+//   const loginInfoStr = wx.getStorageSync('LOGIN_INFO')
+//   const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null
+//   if (loginInfo) {
+//     return wx.uploadFile({
+//       url: `${host}/testApi/file/upload`,
+//       filePath: params.picture,
+//       name: 'file',
+//       header: {
+//         'Content-type': 'multipart/form-data',
+//         'Host': 'www.cheguanglian.com:8080',
+//         'Authorization': `Bearer ${loginInfo.token}`
+//       },
+//       formData: {
+//         type: params.type
+//       },
+//       success(res) {
+//         const data = res.data
+//         console.log(data)
+//       }
+//     })
+//   } else {
+//     // 统一处理没有token跳转登陆页
+//     const url = '../login/main'
+//     wx.redirectTo({ url })
+//     return false
+//   }
+// }
 
 // 获取验证码
 const getMsCode = phoneNumber => {
@@ -91,7 +91,7 @@ const getMsCode = phoneNumber => {
  * @param {*} smCode 后台根据手机号获取
  */
 export const login = (userphone, smCode, code) => {
-  return fly.post('/testApi/auth', utils.json2Form({account: userphone, code, smCode}), {
+  return fly.post('/testApi/auth', utils.json2Form({ account: userphone, code, smCode }), {
     extra: {
       auth: false
     }
@@ -104,18 +104,22 @@ export const getSelAd = () => {
 }
 
 // 首页-添加广告施工
-export const addConstruction = (carWashId, adOrderId, brand, region, carNumber, carNumberOld, picList) => {
-  return fly.post('/testApi/ad/addConstruction', {
-    detail: {
-      carWashId,
-      adOrderId,
-      brand,
-      region,
-      carNumber,
-      carNumberOld
-    },
-    picList
-  })
+/**
+ *{
+ * detail:
+ *  {
+ *    carWashId,
+ *    adOrderId,
+ *    brand,
+ *    region,
+ *    carNumber,
+ *    carNumberOld
+ *  },
+ * picList
+ * }
+ */
+export const addConstruction = (params) => {
+  return fly.post('/testApi/ad/addConstruction', params)
 }
 
 // 我的-获取一级权限用户的基本信息
@@ -123,14 +127,43 @@ export const getUserBaseInfo = () => {
   return fly.get('/testApi/user/userBaseInfo')
 }
 
+// 账户设置-获取一级权限用户下所属的员工列表
+export const getEmployees = () => {
+  return fly.get('/testApi/user/getEmployees')
+}
+
+// 员工账户-删除员工
+export const deleteEmployee = (id) => {
+  return fly.post('/testApi/user/delete', utils.json2Form({ id }))
+}
+
+// 员工账户-新增或修改员工
+export const editEmployee = (name, phone) => {
+  return fly.post('/testApi/user/addOrUpdte', utils.json2Form({ name, phone }))
+}
+
+/**
+ * 明细-获取账户明细
+ * @param {*} type (0:全部；1:收入；2: 支出)
+ * @param {*} offset (当前页起始值)
+ * @param {*} limit (一页条数)
+ */
+export const accountDetail = (type, offset, limit) => {
+  return fly.get(`/testApi/user/selectPageAccountDetail?type=${type}&offset=${offset}&limit=${limit}`)
+}
+
 export default {
   get,
   post,
-  upLoadFile,
+  // upLoadFile,
   checkPhone,
   getMsCode,
   login,
   getSelAd,
   addConstruction,
-  getUserBaseInfo
+  getUserBaseInfo,
+  getEmployees,
+  deleteEmployee,
+  editEmployee,
+  accountDetail
 }
