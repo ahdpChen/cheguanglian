@@ -29,7 +29,7 @@
         placeholder="请输入验证码"
         placeholder-style="color:#3B4664; opacity: 0.2"
         maxlength="6"
-        @input="clearVcErr"
+        @input="clearErr"
       >
       <button
         class="verifyCodeBtn"
@@ -39,15 +39,21 @@
     </div>
     <button class="login-btn" @click="login">验证码</button>
     <base-toast toastType="info" toast="验证码已发送，请注意查收" @showToast="showToast" v-if="isToast"/>
+    <mptoast/>
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
+
+import mptoast from "mptoast";
 import subTitle from "@/components/subTitle";
 import baseToast from "@/components/baseToast";
+import api from "@/utils/ajax";
 
 export default {
   name: "login",
   components: {
+    mptoast,
     baseToast,
     subTitle
   },
@@ -55,6 +61,7 @@ export default {
     return {
       phone: "",
       verifyCode: "",
+      isValid: false,
       isVerifyCodeClick: false,
       verifyCodeText: "验证码",
       verifyCodeTime: 60,
@@ -67,58 +74,113 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["setLoginInfo", "setLoginStatus"]),
     verifyPhone() {
+      this.clearErr();
       if (this.phone.length === 11) {
         this.checkPhone();
-        return;
+      }else {
+        this.isValid = false;
       }
-      this.phoneErr = "";
     },
     checkPhone() {
       console.log(this.phone);
-      this.phoneErr = "手机号未在系统登记";
+      var phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      this.isValid = phoneReg.test(this.phone);
     },
-    getVerifyCode() {
+    async getVerifyCode() {
+      if (!this.isValid) {
+        this.$mptoast("请输入正确的手机号");
+        return;
+      }
       if (this.isVerifyCodeClick) {
         return;
       }
-      this.showToast();
       this.isVerifyCodeClick = true;
-      this.setTimeCut();
-      this.verifyCodeTimer = setInterval(() => {
+      const res = await api.getMsCode(this.phone);
+      console.log(res);
+      if (res && res.code === 200) {
+        this.showToast();
         this.setTimeCut();
-      }, 1000);
+        this.verifyCodeTimer = setInterval(() => {
+          this.setTimeCut();
+        }, 1000);
+      } else if(res && res.message) {
+        if (res.message.indexOf("手机号不存在") > -1) {
+          this.phoneErr = "手机号未在系统登记";
+        } else {
+          this.$mptoast(res.message);
+        }
+        this.isVerifyCodeClick = false;
+      }else {
+        this.isVerifyCodeClick = false;
+      }
     },
     setTimeCut() {
       this.verifyCodeTime--;
       this.verifyCodeText = `${this.verifyCodeTime}s`;
       if (this.verifyCodeTime <= 0) {
-        this.isVerifyCodeClick = false;
-        this.verifyCodeTime = 0;
         this.verifyCodeText = "重新获取";
+        this.verifyCodeTime = 60;
+        this.isVerifyCodeClick = false;
         clearInterval(this.verifyCodeTimer);
         this.verifyCodeTimer = null;
       }
     },
-    clearVcErr() {
-      this.vcErr = "";
+    // 获取wx.login的code
+    getCode() {
+      return new Promise((resolve, rej) => {
+        wx.login({
+          success(res) {
+            if (res.code) {
+              resolve(res.code);
+            } else {
+              rej(res);
+            }
+          },
+          fail(err) {
+            rej(err);
+          }
+        });
+      });
     },
-    jumpPage(path, jumpMethod) {
-      console.log(`path:${path}, jumpMethod:${jumpMethod}`);
-      const url = `../${path}/main`;
-      wx[jumpMethod]({ url });
-    },
-    login() {
+    async login() {
+      const { phone, verifyCode } = this;
+      if (!this.isValid) {
+        this.$mptoast("请输入正确的手机号");
+        return;
+      }
+      if (!verifyCode) {
+        this.$mptoast("请输入验证码");
+        return;
+      }
       if (this.isSubmitClick) {
         return;
       }
       this.isSubmitClick = true;
-      console.log("login", "手机号" + this.phone, "验证码" + this.verifyCode);
-      this.vcErr = "验证码错误，请重新输入";
-      setTimeout(() => {
-        this.isSubmitClick = true;
+      const code = await this.getCode();
+      const res = await api.login(phone, verifyCode, code);
+      if (res && res.code === 200) {
+        this.setLoginStatus(true);
+        this.setLoginInfo(res.data);
+        wx.setStorageSync("LOGIN_INFO", JSON.stringify(res.data));
         this.jumpPage("home", "switchTab");
-      }, 3000);
+      } else if (res && res.message) {
+        if (res.message.indexOf("验证码") > -1) {
+          this.vcErr = res.message;
+        } else {
+          this.$mptoast(res.message);
+        }
+      }
+      this.isSubmitClick = false;
+    },
+    clearErr() {
+      this.phoneErr = "";
+      this.vcErr = "";
+    },
+    jumpPage(path, jumpMethod) {
+      const url = `../${path}/main`;
+      wx[jumpMethod]({ url });
     },
     showToast() {
       this.isToast = !this.isToast;

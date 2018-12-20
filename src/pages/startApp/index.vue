@@ -8,46 +8,42 @@
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
 
 export default {
-  name: 'start',
-  data () {
+  name: "start",
+  data() {
     return {
-      isShow: false
-    }
+      loginInfo: null,
+      time: 2500 //设置过渡页时间
+    };
   },
   methods: {
-    getUserInfo () {
-      // 调用登录接口
-      wx.login({
-        success: () => {
-          wx.getUserInfo({
-            success: (res) => {
-              this.userInfo = res.userInfo
-            }
-          })
-        }
-      })
-    },
-    jumpPage (path, jumpMethod) {
-      console.log(`path:${path}, jumpMethod:${jumpMethod}`)
-      const url = `../${path}/main`
-      wx[jumpMethod]({ url })
+    ...mapActions(["setLoginInfo", "setLoginStatus"]),
+    jumpPage(path, jumpMethod) {
+      const url = `../${path}/main`;
+      wx[jumpMethod]({ url });
     }
   },
-  created () {
-    // 调用应用实例的方法获取全局数据
-    this.getUserInfo()
-  },
-  mounted () {
+  show() {},
+  mounted() {
     try {
-      wx.setStorageSync('test', '123')
+      const loginInfoStr = wx.getStorageSync("LOGIN_INFO");
+      this.loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null;
       setTimeout(() => {
-        this.jumpPage('login', 'redirectTo')
-      }, 3000)
-    } catch (e) { console.log(e) }
+        if (this.loginInfo) {
+          this.setLoginStatus(true);
+          this.setLoginInfo(this.loginInfo)
+          this.jumpPage("home", "switchTab");
+        } else {
+          this.jumpPage("login", "redirectTo");
+        }
+      }, this.time);
+    } catch (e) {
+      console.log(e);
+    }
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .start-page {
@@ -58,11 +54,11 @@ export default {
   height: 100vh;
   padding: 30% 0;
   box-sizing: border-box;
-  background: #545DFF;
+  background: #545dff;
   .logo {
     width: 180px;
     height: 47px;
-    background: url('./images/Union.png') center/100% no-repeat;
+    background: url("./images/Union.png") center/100% no-repeat;
   }
   .copy-right {
     font-size: 16px;

@@ -6,21 +6,20 @@
         <div class="home-tip">
           <ul>
             <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
-            <li>
-              2. 在
-              <span @click="navigationToPage" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
+            <li>2. 在
+              <span @click="jumpPage('advert', 'navigateTo')" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
             </li>
           </ul>
         </div>
         <div class="select-tip">选择已贴车贴</div>
         <div :class="{ fixed: isScroll }">
           <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
-            <div>雪花（1个月起，2019-01-30结束）</div>
+            <div>{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</div>
             <div class="arrow"></div>
           </div>
           <div class="car-license" v-if="chooseImages.length">
             <div class="license-left" @click="licenseIsClick">
-              <span>沪</span>
+              <span>{{ preLicense }}</span>
               <div class="arrow"></div>
             </div>
             <div class="license-right">
@@ -37,8 +36,8 @@
           <div class="camera-icon"></div>
         </div>
         <div class="choose-imgs" v-if="chooseImages.length">
-          <div class="choose-img-wrap" v-for="(src, index) in chooseImages" :key="index">
-            <img :src="src" alt>
+          <div class="choose-img-wrap" v-for="(item, index) in chooseImages" :key="index">
+            <img :src="item.src" alt>
             <img
               class="cancel-btn"
               src="./images/cancel.png"
@@ -47,14 +46,10 @@
             >
           </div>
         </div>
-        <div
-          class="camera-extra"
-          @click="camera"
-          v-if="isGoOnTakePhoto"
-        >+ 继续拍照</div>
+        <div class="camera-extra" @click="camera" v-if="isGoOnTakePhoto">+ 继续拍照</div>
       </div>
     </scroll-view>
-    <button class="submit" v-if="chooseImages.length">确认提交</button>
+    <button class="submit" v-if="chooseImages.length" @click="addConstruction">确认提交</button>
 
     <base-modal customClass="select-modal" position="top" v-if="isClick" @showModal="selectIsClick">
       <div class="select-container">
@@ -77,21 +72,25 @@
         <span></span>
       </div>
     </base-modal>
+    <mptoast/>
   </div>
 </template>
 <script>
+import mptoast from "mptoast";
+
 import carJson from "./json/carLicense.json";
 import subTitle from "@/components/subTitle";
 import baseModal from "@/components/baseModal";
 import selectOptionsModal from "./components/selectOptions";
 import licenseOptionsModal from "./components/licenseOptions";
 
-
-import { upLoadFile } from '@/utils/ajax'
+import api from "@/utils/ajax";
+import config from "../../config/config";
 
 export default {
   name: "home",
   components: {
+    mptoast,
     subTitle,
     baseModal,
     selectOptionsModal,
@@ -99,35 +98,14 @@ export default {
   },
   data() {
     return {
-      selectOptions: [
-        {
-          id: 1,
-          name: "1雪花（1个月起，2019-01-30结束）"
-        },
-        {
-          id: 2,
-          name: "2雪花（1个月起，2019-01-30结束）"
-        },
-        {
-          id: 3,
-          name: "3雪花（1个月起，2019-01-30结束）"
-        },
-        {
-          id: 4,
-          name: "4雪花（1个月起，2019-01-30结束）"
-        },
-        {
-          id: 5,
-          name: "5雪花（1个月起，2019-01-30结束）"
-        },
-        {
-          id: 6,
-          name: "6雪花（1个月起，2019-01-30结束）"
-        }
-      ],
+      selectOptions: [],
+      defaultAdvert: {},
       licenseOptions: carJson.carLicense,
       chooseImages: [],
+      preLicense: "沪",
       license: "",
+      scanLicense: '',
+      progress: 0,
       isUpLoading: false,
       isScroll: false,
       isClick: false,
@@ -139,91 +117,146 @@ export default {
       return !!this.isClick;
     },
     isGoOnTakePhoto() {
-      return !this.isUpLoading && this.chooseImages.length && this.chooseImages < 3
+      return (
+        !this.isUpLoading &&
+        this.chooseImages.length &&
+        this.chooseImages.length < 3
+      );
     }
   },
   methods: {
-    navigationToPage() {
-      const url = "../advert/main";
-      wx.navigateTo({ url });
-    },
     scroll(e) {
       const { scrollTop } = e.mp.detail;
       this.isScroll = scrollTop > 249;
     },
-    selectIsClick() {
-      this.isClick = !this.isClick;
-    },
-    selectOption(option) {
-      this.isClick = false;
-    },
-    licenseIsClick() {
-      this.isLicenseClick = !this.isLicenseClick;
-    },
-    licenseOption() {
-      this.isLicenseClick = false;
-    },
-    setLicense(e) {
-      let { value } = e.target;
-      this.license = value.toUpperCase();
-    },
-    takePhotoPromise () {
-      return new Promise((res, rej)=> {
+    takePhotoPromise() {
+      return new Promise((res, rej) => {
         wx.chooseImage({
           count: 1,
           sizeType: ["compressed"],
           sourceType: ["camera"],
           success(data) {
-            res(data)
+            res(data);
           },
           fail(err) {
-            rej(err)
+            rej(err);
           },
           complete() {}
+        });
+      });
+    },
+    uploadFile(params) {
+      const _this = this;
+      const loginInfoStr = wx.getStorageSync("LOGIN_INFO");
+      const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null;
+      const uploadTask = wx.uploadFile({
+        url: `${config.host}/testApi/file/upload`,
+        filePath: params.picture,
+        name: "file",
+        header: {
+          "Content-type": "multipart/form-data",
+          Host: "www.cheguanglian.com:8080",
+          Authorization: `Bearer ${loginInfo.token}`
+        },
+        formData: {
+          type: params.type
+        },
+        success(res) {
+          const data = JSON.parse(res.data).data;
+          _this.chooseImages[params.index].serverSrc = data.picUrl;
+          console.log(data, _this.chooseImages)
+        },
+        complete() {
+          wx.hideLoading();
+          _this.progress = 0;
+        }
+      });
+      uploadTask.onProgressUpdate(res => {
+        this.progress = res.progress;
+        wx.showLoading({
+          title: `已上传${this.progress}%`,
         })
-      })
+      });
     },
     async camera() {
       let res = await this.takePhotoPromise();
-      if(res && res.tempFilePaths.length) {
+      if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
-        await upLoadFile(tempFilePaths[0]);
+        this.chooseImages = this.chooseImages.concat([{src: tempFilePaths[0]}]);
+
+        const params = { type: 1, picture: tempFilePaths[0], index: this.chooseImages.length - 1 };
+        this.uploadFile(params);
       }
     },
     delImg(e) {
       const { chooseimgindex } = e.target.dataset;
       this.chooseImages.splice(chooseimgindex, 1);
     },
-    getUserInfo() {
-      // 调用登录接口
-      wx.login({
-        success: () => {
-          wx.getUserInfo({
-            success: res => {
-              this.userInfo = res.userInfo;
-            }
-          });
-        }
-      });
+    jumpPage(path, jumpMethod) {
+      const url = `../${path}/main`;
+      wx[jumpMethod]({ url });
     },
-    redirect() {
-      const url = "../login/main";
-      wx.redirectTo({ url });
+    selectIsClick() {
+      this.isClick = !this.isClick;
+    },
+    selectOption(option) {
+      console.log(option);
+      this.defaultAdvert = option;
+      this.isClick = false;
+    },
+    licenseIsClick() {
+      this.isLicenseClick = !this.isLicenseClick;
+    },
+    licenseOption(option) {
+      console.log(option);
+      this.preLicense = option.name;
+      this.isLicenseClick = false;
+    },
+    setLicense(e) {
+      let { value } = e.target;
+      this.license = value.toUpperCase();
+    },
+    async addConstruction() {
+      const { defaultAdvert, scanLicense, chooseImages } = this;
+      if(!this.license) {
+        this.$mptoast("请输入车牌号");
+      }
+      let params = {
+        detail: {
+          carWashId: this.$store.state.loginInfo.id,
+          adOrderId: defaultAdvert.id,
+          brand: defaultAdvert.brand,
+          region: this.preLicense,
+          carNumber: this.license,
+          carNumberOld: scanLicense
+        },
+        picList: chooseImages.map(img=>img.serverSrc)
+      }
+      console.log(params)
+      //const res = await api.addConstruction(params);
     }
   },
-  created() {
-    // 调用应用实例的方法获取全局数据
-    this.getUserInfo();
+  async onShow() {
+    console.log("onShow");
+    // 获取广告下拉列表
+    const res = await api.getSelAd();
+    if (res && res.code === 200) {
+      res.data.forEach(d => {
+        if (d.minTimeLen > 30) {
+          d.formateMinTimeLen = `${parseInt(
+            d.minTimeLen / 30
+          )}个月${d.minTimeLen % 30}天`;
+        } else {
+          d.formateMinTimeLen = `${d.minTimeLen}天`;
+        }
+        d.endTime = d.endTime.split(" ")[0];
+      });
+      this.defaultAdvert = res.data[0];
+      this.selectOptions = [].concat(res.data);
+    }
   },
   mounted() {
-    try {
-      const value = wx.getStorageSync("test");
-      if (value) {
-        console.log(value);
-      }
-    } catch (e) {
-      console.log(e);
-    }
+    console.log("mounted");
   }
 };
 </script>
