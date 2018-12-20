@@ -1,8 +1,8 @@
 {
   "pages": [
-    "pages/home/main",
     "pages/startApp/main",
     "pages/login/main",
+    "pages/home/main",
     "pages/my/main",
     "pages/transactions/main",
     "pages/transactionDetail/main",

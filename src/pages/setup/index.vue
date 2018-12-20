@@ -3,13 +3,13 @@
     <div class="my-info">
       <img class="my-pic" src="./images/head_pic.png" alt>
       <div class="my-info-detail">
-        <div class="my-base-info">王大大 13512341234</div>
-        <p class="my-shop">上海xxx汽车美容</p>
+        <div class="my-base-info">{{ userInfo.name }} {{ userInfo.account }}</div>
+        <p class="my-shop">{{ userInfo.carWashName }}</p>
       </div>
     </div>
     <scroll-view class="scroll-container" scroll-y enable-back-to-top @scroll="scroll">
       <div class="scroll-wrap">
-        <ul>
+        <ul v-if="employees.length">
           <li v-for="(employ, index) in employees" :key="index" @click="jumpPage(employ.id)">
             <div class="employ-info">
               <div class="employ-name">{{ employ.name }}</div>
@@ -18,6 +18,10 @@
             <div class="arrow"></div>
           </li>
         </ul>
+        <div v-else class="empty">
+          <p class="tip">暂无员工账号</p>
+          <img src="./images/empty.png" alt>
+        </div>
       </div>
     </scroll-view>
     <button class="set-btn" @click="jumpPage(null)">新增员工账号</button>
@@ -25,38 +29,19 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import api from "@/utils/ajax";
+
 export default {
   name: "setup",
   data() {
     return {
-      employees: [
-        {
-          id: "1",
-          name: "小王",
-          phone: "13512341235"
-        },
-        {
-          id: "2",
-          name: "大王",
-          phone: "13512341236"
-        },
-        {
-          id: "3",
-          name: "张三",
-          phone: "13512341237"
-        },
-        {
-          id: "4",
-          name: "赵四",
-          phone: "13512341238"
-        },
-        {
-          id: "5",
-          name: "赵四",
-          phone: "13512341238"
-        }
-      ]
+      employees: []
     };
+  },
+  computed: {
+    userInfo() {
+      return this.$store.state.userInfo;
+    }
   },
   methods: {
     ...mapActions(["setemployees"]),
@@ -66,37 +51,21 @@ export default {
     jumpPage(id) {
       const url = `../createAcount/main?id=${id}`;
       wx.navigateTo({ url });
-    },
-    showModal() {
-      wx.showModal({
-        title: "提示",
-        content: "这是一个模态弹窗",
-        showCancel: false,
-        success(res) {
-          if (res.confirm) {
-            console.log("用户点击确定");
-          } else if (res.cancel) {
-            console.log("用户点击取消");
-          }
-        }
+    }
+  },
+  async onShow() {
+    const res = await api.getEmployees();
+    console.log(res);
+    if (res && res.code === 200) {
+      this.employees = res.data.map(employ => {
+        employ.formatePhone = this.phoneFilter(employ.account);
+        return employ;
       });
-    },
-    showToast() {
-      wx.showToast({
-        title: "成功",
-        icon: "success",
-        duration: 2000
-      });
+      this.setemployees(this.employees);
     }
   },
   mounted() {
-    console.log('mounted')
-    this.employees = this.employees.map(employ => {
-      employ.formatePhone = this.phoneFilter(employ.phone);
-      return employ;
-    });
-
-    this.setemployees(this.employees);
+    console.log("mounted");
   }
 };
 </script>
@@ -172,6 +141,27 @@ export default {
             background: url("./images/arrow.png") center/100% no-repeat;
             transition: transform 0.3s;
           }
+        }
+      }
+      .empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: calc(100vh - 170px);
+        padding-bottom: 60px;
+        box-sizing: border-box;
+        .tip {
+          height: 60px;
+          line-height: 60px;
+          margin-bottom: 40px;
+          font-size: 14px;
+          text-align: center;
+          color: #aeb3c0;
+        }
+        img {
+          display: block;
+          width: 300px;
         }
       }
     }

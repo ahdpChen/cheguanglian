@@ -10,32 +10,41 @@
         >{{ tab.name }}</li>
       </ul>
     </div>
-    <scroll-view class="scroll-container" scroll-y enable-back-to-top>
+    <scroll-view
+      class="scroll-container"
+      scroll-y
+      enable-back-to-top
+      @scrolltolower="pullUploadMore"
+    >
       <div class="scroll-wrap">
         <div class="transaction-list">
           <ul>
             <li
               v-for="(item, index) in transactionsData"
               :key="index"
-              @click="navigationToPage('transactionDetail')"
+              @click="navigationToPage('transactionDetail', item.id)"
             >
               <div class="flex transaction-info">
-                <p>{{ item.title }}</p>
-                <p>{{ item.transactionDate }}</p>
+                <p>{{ item.type }}</p>
+                <p>{{ item.createTime }}</p>
               </div>
               <div class="flex transaction-status">
-                <p>-￥{{ item.money }}</p>
+                <p>{{ item.type === '提现'? '-': '+' }}￥{{ item.formateAmount }}</p>
                 <p v-if="item.status">{{ item.status }}</p>
               </div>
               <div class="arrow"></div>
             </li>
           </ul>
         </div>
+        <div class="loadMore" @click="getMore">{{loadMore? '加载更多': '没有更多了'}}</div>
       </div>
     </scroll-view>
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
+import api from "@/utils/ajax";
+
 export default {
   name: "transactions",
   data() {
@@ -55,48 +64,77 @@ export default {
         }
       ],
       tabIndex: 0,
-      transactionsData: [
-        {
-          title: "提现",
-          money: 5,
-          transactionDate: "2018-12-30 12:30:20",
-          status: "处理中..."
-        },
-        {
-          title: "提现",
-          money: 5,
-          transactionDate: "2018-12-30 12:30:20",
-          status: "处理中..."
-        },
-        {
-          title: "提现",
-          money: 5,
-          transactionDate: "2018-12-30 12:30:20",
-          status: ""
-        },
-        {
-          title: "提现",
-          money: 5,
-          transactionDate: "2018-12-30 12:30:20",
-          status: "处理中..."
-        }
-      ]
+      transactionsData: [],
+      pageParams: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     };
   },
-  methods: {
-    navigationToPage(path) {
-      const url = `../${path}/main`;
-      wx.navigateTo({ url });
+  computed: {
+    offset() {
+      const { page, limit } = this.pageParams;
+      return (page - 1) * limit;
     },
-    changeTab(index) {
-      this.tabIndex = index;
+    loadMore() {
+      return this.transactionsData.length < this.pageParams.total;
     }
   },
-  mounted() {
+  methods: {
+    ...mapActions(["settransactions"]),
+    async getAccountDetail() {
+      wx.showLoading({
+        title: "加载中"
+      });
+      const {
+        tabIndex,
+        offset,
+        pageParams: { page, limit }
+      } = this;
+      const res = await api.accountDetail(tabIndex, offset, limit);
+      wx.hideLoading();
+      if (res && res.code === 200) {
+        const currData = page === 1 ? [] : this.transactionsData;
+        const { rows, total } = res.data;
+        rows.forEach(row => {
+          row.formateAmount = row.amount.toFixed(2);
+        });
+        this.transactionsData = currData.concat(rows);
+        this.pageParams.total = total;
+        this.settransactions(this.transactionsData);
+      }
+    },
+    changeTab(index) {
+      if (this.tabIndex === index) {
+        return;
+      }
+      this.tabIndex = index;
+      this.pageParams.page = 1;
+      this.getAccountDetail();
+    },
+    pullUploadMore() {
+      if (!this.loadMore) {
+        return;
+      }
+      this.pageParams.page++;
+      this.getAccountDetail();
+    },
+    navigationToPage(path, id) {
+      let url = `../${path}/main`;
+      if (id) {
+        url += `?id=${id}`;
+      }
+      wx.navigateTo({ url });
+    }
+  },
+  async onShow() {
     wx.setNavigationBarTitle({
       title: "明细"
     });
-  }
+    this.getAccountDetail();
+  },
+  mounted() {}
 };
 </script>
 <style lang="scss" scoped>
@@ -165,17 +203,25 @@ export default {
                 justify-content: center;
                 flex-direction: column;
                 text-align: center;
-                width: 60px;
+                // width: 60px;
                 height: 100%;
               }
             }
             .arrow {
               width: 8px;
               height: 22px;
+              margin-left: 10px;
               background: url("./images/arrow.png") center/100% no-repeat;
             }
           }
         }
+      }
+      .loadMore {
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        font-size: 16px;
+        color: #1b1b4e;
       }
     }
   }

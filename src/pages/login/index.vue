@@ -79,13 +79,13 @@ export default {
       this.clearErr();
       if (this.phone.length === 11) {
         this.checkPhone();
-      }else {
+      } else {
         this.isValid = false;
       }
     },
     checkPhone() {
       console.log(this.phone);
-      var phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      const phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
       this.isValid = phoneReg.test(this.phone);
     },
     async getVerifyCode() {
@@ -105,14 +105,14 @@ export default {
         this.verifyCodeTimer = setInterval(() => {
           this.setTimeCut();
         }, 1000);
-      } else if(res && res.message) {
+      } else if (res && res.message) {
         if (res.message.indexOf("手机号不存在") > -1) {
           this.phoneErr = "手机号未在系统登记";
         } else {
           this.$mptoast(res.message);
         }
         this.isVerifyCodeClick = false;
-      }else {
+      } else {
         this.isVerifyCodeClick = false;
       }
     },

@@ -4,12 +4,14 @@ import createPersistedState from 'vuex-persistedstate'
 
 import advertItem from './module/advertItem'
 import setUp from './module/setUp'
+import transactions from './module/transactions'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
     loginInfo: {},
+    userInfo: {},
     isLogin: false
   },
   mutations: {
@@ -18,6 +20,9 @@ const store = new Vuex.Store({
     },
     SET_LOGIN_STATUS: (state, isLogin) => {
       state.isLogin = isLogin
+    },
+    SET_USER_INFO: (state, userInfo) => {
+      state.userInfo = userInfo
     }
   },
   actions: {
@@ -26,6 +31,9 @@ const store = new Vuex.Store({
     },
     setLoginStatus ({ commit }, isLogin) {
       commit('SET_LOGIN_STATUS', isLogin)
+    },
+    setUserInfo: ({ commit }, userInfo) => {
+      commit('SET_USER_INFO', userInfo)
     }
   },
   plugins: [
@@ -39,7 +47,8 @@ const store = new Vuex.Store({
   ],
   modules: {
     advertItem,
-    setUp
+    setUp,
+    transactions
   }
 })
 

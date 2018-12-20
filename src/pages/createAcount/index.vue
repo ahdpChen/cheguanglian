@@ -1,6 +1,6 @@
 <template>
   <div class="create-page">
-    <div class="del-acount" v-if="employData.id">删除该员工</div>
+    <div class="del-acount" v-if="employData.id" @click="handleDelete">删除该员工</div>
     <div class="input-wrap">
       <label for="name">
         <span>姓名</span>
@@ -20,61 +20,127 @@
       <input
         id="phone"
         type="number"
-        v-model="employData.phone"
+        v-model="employData.account"
         maxlength="11"
         placeholder="请输入手机号码"
         placeholder-style="color: #3B4664;opacity: 0.2;"
       >
     </div>
     <button class="submit" :class="{'active': isActive}" @click="submit">{{ submitText }}</button>
+    <mptoast/>
   </div>
 </template>
 <script>
+import api from "@/utils/ajax";
+import mptoast from "mptoast";
+
 export default {
   name: "create",
+  conponents: {
+    mptoast
+  },
   data() {
     return {
       employData: {
         id: "",
         name: "",
-        phone: ""
+        account: ""
       },
       originData: {
+        id: "",
         name: "",
-        phone: ""
-      }
+        account: ""
+      },
+      isLoading: false
     };
   },
   computed: {
     submitText() {
-      return this.employData.id ? "确认修改" : "确认添加";
+      return this.originData.id ? "确认修改" : "确认添加";
     },
     isActive() {
-      const { name, phone } = this.employData;
-      const { name: originName, phone: originPhone } = this.originData;
+      const { name, account } = this.employData;
+      const { name: originName, account: originPhone } = this.originData;
       return (
         name.length &&
-        phone.length === 11 &&
-        !(name === originName && phone === originPhone)
+        account.length === 11 &&
+        !(name === originName && account === originPhone)
       );
     }
   },
   methods: {
-    submit() {}
+    handleDelete() {
+      const _this = this;
+      wx.showModal({
+        title: "温馨提示",
+        content: "删除员工账号后该员工将无法登录系统，是否继续删除？",
+        confirmText: "继续",
+        success(res) {
+          if (res.confirm) {
+            _this.deleteEmployee();
+          } else if (res.cancel) {
+            console.log("用户点击取消");
+          }
+        }
+      });
+    },
+    async deleteEmployee() {
+      const res = await api.deleteEmployee(this.employData.id);
+      console.log(res);
+      if (res && res.code === 200) {
+        this.showToast("用户已被删除");
+      }
+    },
+    async submit() {
+      if (!this.isActive && this.isLoading) {
+        return;
+      }
+      const phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
+      const { name, account } = this.employData;
+      if (phoneReg.test(account)) {
+        this.isLoading = true;
+        const res = await api.editEmployee(name, account);
+        console.log(res);
+        this.isLoading = false;
+        if (res && res.code === 200) {
+          const title = this.originData.id ? "用户修改成功" : "用户新增成功";
+          this.showToast(title);
+        }
+      } else {
+        this.$mptoast("请输入正确的手机号");
+      }
+    },
+    jumpPage(path, jumpMethod) {
+      const url = `../${path}/main`;
+      wx[jumpMethod]({ url });
+    },
+    showToast(title) {
+      const _this = this;
+      wx.showToast({
+        title,
+        icon: "success",
+        duration: 2000,
+        success() {
+          _this.jumpPage({ delta: 1 }, "navigateBack");
+        }
+      });
+    }
   },
-  mounted() {
+  onShow() {
     const { id } = this.$root.$mp.query;
     if (id) {
       this.employData =
         this.$store.state.setUp.employees.filter(employ => {
-          return employ.id === id;
+          return employ.id === parseInt(id);
         })[0] || this.employData;
       this.originData = JSON.parse(JSON.stringify(this.employData));
     }
   },
+  mounted() {
+    console.log("mounted");
+  },
   onLoad() {
-    //处理二次打开页面data不会初始化
-    Object.assign(this.$data, this.$options.data())
+    Object.assign(this.$data, this.$options.data());
   }
 };
 </script>
@@ -96,14 +162,15 @@ export default {
       color: #aeb3c0;
     }
     input {
-      line-height: 22px;
+      height: 50px;
+      line-height: 50px;
       font-size: 14px;
-      color: #aeb3c0;
+      color: #3b4664;
       margin-top: 10px;
       border-bottom: 1px solid #ebebeb;
     }
     & + .input-wrap {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
   }
   .submit {
