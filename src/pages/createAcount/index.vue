@@ -162,14 +162,15 @@ export default {
       color: #aeb3c0;
     }
     input {
-      line-height: 22px;
+      height: 50px;
+      line-height: 50px;
       font-size: 14px;
       color: #3b4664;
       margin-top: 10px;
       border-bottom: 1px solid #ebebeb;
     }
     & + .input-wrap {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
   }
   .submit {
