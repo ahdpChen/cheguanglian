@@ -1,8 +1,8 @@
 <template>
   <ul>
     <li v-for="(bank, index) in bankInfo" :data-bank="bank" :key="index" @click="select">
-      <img :src="bank.formateIcon" alt="">
-      <span>{{ bank.name }}</span>
+      <img :src="bank.iconUrl" alt="">
+      <span>{{ bank.bankName }}</span>
     </li>
     <li>
       <div class="input-wrap">
@@ -25,9 +25,17 @@ export default {
   methods: {
     select (e) {
       const { bank } = e.mp.currentTarget.dataset
-      this.$emit('selectOption', bank.name)
+      this.$emit('selectOption', bank)
     },
     bankCarSubmit() {
+      if(!this.bankName) {
+        wx.showToast({
+          title: '请先选择开户行',
+          icon: 'none',
+          duration: 2000
+        })
+        return;
+      }
       this.$emit('selectOption', this.bankName)
     }
   }

@@ -8,10 +8,10 @@ const advertItem = {
     }
   },
   actions: {
-    setLoginStatus ({ commit, state }, isLogin) {
-      commit('SET_LOGIN_STATUS', isLogin)
-    },
-    setAdvertItem ({ commit, state }, advertItem) {
+    // setLoginStatus ({ commit, state }, isLogin) {
+    //   commit('SET_LOGIN_STATUS', isLogin)
+    // },
+    setAdvertItem ({ commit }, advertItem) {
       commit('SET_ADVERT_DETAIL', advertItem)
     }
   }

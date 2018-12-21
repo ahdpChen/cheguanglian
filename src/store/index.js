@@ -5,6 +5,7 @@ import createPersistedState from 'vuex-persistedstate'
 import advertItem from './module/advertItem'
 import setUp from './module/setUp'
 import transactions from './module/transactions'
+import deposit from './module/deposit'
 
 Vue.use(Vuex)
 
@@ -48,7 +49,8 @@ const store = new Vuex.Store({
   modules: {
     advertItem,
     setUp,
-    transactions
+    transactions,
+    deposit
   }
 })
 
