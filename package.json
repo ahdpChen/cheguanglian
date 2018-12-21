@@ -2,7 +2,7 @@
   "name": "cheguanglian",
   "version": "1.0.0",
   "description": "A Mpvue project for cheguanglian",
-  "author": "",
+  "author": "chendapeng",
   "private": true,
   "scripts": {
     "dev:wx": "node build/dev-server.js wx",

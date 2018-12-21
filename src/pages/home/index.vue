@@ -167,7 +167,6 @@ export default {
           if (data.number) {
             _this.scanLicense = data.number;
           }
-          console.log(data, _this.chooseImages);
         },
         complete() {
           wx.hideLoading();
@@ -209,7 +208,6 @@ export default {
       this.isClick = !this.isClick;
     },
     selectOption(option) {
-      console.log(option);
       this.defaultAdvert = option;
       this.isClick = false;
     },
@@ -217,7 +215,6 @@ export default {
       this.isLicenseClick = !this.isLicenseClick;
     },
     licenseOption(option) {
-      console.log(option);
       this.preLicense = option.name;
       this.isLicenseClick = false;
     },
@@ -229,10 +226,10 @@ export default {
       const { defaultAdvert: { adOrderId, brand }, scanLicense, chooseImages } = this;
       if (!this.license) {
         this.$mptoast("请输入车牌号");
+        return;
       }
       let params = {
         detail: {
-          carWashId: this.$store.state.loginInfo.id,
           adOrderId,
           brand,
           region: this.preLicense,
@@ -241,7 +238,6 @@ export default {
         },
         picList: chooseImages.map(img => img.serverSrc)
       };
-      console.log(params);
       const res = await api.addConstruction(params);
     }
   },

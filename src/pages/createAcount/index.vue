@@ -19,26 +19,23 @@
       </label>
       <input
         id="phone"
+        :class="{ disabled }"
         type="number"
         v-model="employData.account"
         maxlength="11"
         placeholder="请输入手机号码"
         placeholder-style="color: #3B4664;opacity: 0.2;"
+        :disabled="disabled"
       >
     </div>
     <button class="submit" :class="{'active': isActive}" @click="submit">{{ submitText }}</button>
-    <mptoast/>
   </div>
 </template>
 <script>
 import api from "@/utils/ajax";
-import mptoast from "mptoast";
 
 export default {
   name: "create",
-  conponents: {
-    mptoast
-  },
   data() {
     return {
       employData: {
@@ -55,6 +52,10 @@ export default {
     };
   },
   computed: {
+    disabled() {
+      // 保证手机号不可修改
+      return !!this.originData.id;
+    },
     submitText() {
       return this.originData.id ? "确认修改" : "确认添加";
     },
@@ -86,42 +87,44 @@ export default {
     },
     async deleteEmployee() {
       const res = await api.deleteEmployee(this.employData.id);
-      console.log(res);
       if (res && res.code === 200) {
-        this.showToast("用户已被删除");
+        this.showToast("用户已被删除", "success", true);
       }
     },
     async submit() {
-      if (!this.isActive && this.isLoading) {
+      if (!this.isActive || this.isLoading) {
         return;
       }
       const phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
       const { name, account } = this.employData;
       if (phoneReg.test(account)) {
         this.isLoading = true;
-        const res = await api.editEmployee(name, account);
-        console.log(res);
+        let params = { name, account };
+        // if(this.originData.id) {
+        //   params.id = this.originData.id;
+        // }
+        const res = await api.editEmployee(params);
         this.isLoading = false;
         if (res && res.code === 200) {
           const title = this.originData.id ? "用户修改成功" : "用户新增成功";
-          this.showToast(title);
+          this.showToast(title, "success", true);
         }
       } else {
-        this.$mptoast("请输入正确的手机号");
+        this.showToast("请输入正确的手机号", "none", false);
       }
     },
     jumpPage(path, jumpMethod) {
       const url = `../${path}/main`;
       wx[jumpMethod]({ url });
     },
-    showToast(title) {
+    showToast(title, icon, callback) {
       const _this = this;
       wx.showToast({
         title,
-        icon: "success",
+        icon: icon || "success",
         duration: 2000,
         success() {
-          _this.jumpPage({ delta: 1 }, "navigateBack");
+          callback && _this.jumpPage({ delta: 1 }, "navigateBack");
         }
       });
     }
@@ -168,6 +171,10 @@ export default {
       color: #3b4664;
       margin-top: 10px;
       border-bottom: 1px solid #ebebeb;
+      &.disabled {
+        color: #3b4664;
+        opacity: 0.2;
+      }
     }
     & + .input-wrap {
       margin-bottom: 20px;
