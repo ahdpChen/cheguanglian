@@ -260,6 +260,12 @@ export default {
       this.selectOptions = [].concat(res.data);
     }
   },
+  onShareAppMessage() {
+    return {
+      title: '自定义转发标题',
+      path: 'page/startApp/main'
+    }
+  },
   mounted() {
     console.log("mounted");
   }

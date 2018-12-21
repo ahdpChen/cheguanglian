@@ -112,7 +112,13 @@ export const getSelAd = () => {
  * }
  */
 export const addConstruction = (params) => {
-  return fly.post('/testApi/ad/addConstruction', JSON.stringify(params))
+  // return fly.post('/testApi/ad/addConstruction', JSON.stringify(params))
+  // return fly.post('/testApi/ad/addConstruction', qa.stringify(params))
+  // return fly.post('/testApi/ad/addConstruction', params)
+  return fly.post('/testApi/ad/addConstruction', qs.stringify({
+    detail: JSON.stringify(params.detail),
+    picList: JSON.stringify(params.picList)
+  }))
 }
 
 // 我的-获取一级权限用户的基本信息
@@ -152,6 +158,8 @@ export const editEmployee = (params) => {
 export const accountDetail = (type, offset, limit) => {
   return fly.get('/testApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
 }
+
+// 提现-
 
 export default {
   get,
