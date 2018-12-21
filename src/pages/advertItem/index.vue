@@ -146,8 +146,6 @@ export default {
               margin-left: 14px;
               background: url("./images/arrow.png") center/100% no-repeat;
             }
-            span {
-            }
           }
         }
         &.gray {

@@ -111,7 +111,7 @@ export default {
         });
         return;
       }
-      this.reaMoney = avalidMoney;
+      this.acountInfo.reaMoney = avalidMoney;
     },
     beforeSubmit() {
       this.handleSubmit(
