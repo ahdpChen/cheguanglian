@@ -68,7 +68,6 @@ export default {
   async onShow() {
     if (this.isTopLevel) {
       const res = await api.getUserBaseInfo();
-      console.log(res);
       if(res && res.code === 200) {
         this.userBaseInfo = Object.assign(res.data, {
           formateTotalAmount: utils.formatNumberWithComma(res.data.totailAmount),

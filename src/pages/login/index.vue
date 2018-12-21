@@ -84,7 +84,6 @@ export default {
       }
     },
     checkPhone() {
-      console.log(this.phone);
       const phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/;
       this.isValid = phoneReg.test(this.phone);
     },
@@ -98,7 +97,6 @@ export default {
       }
       this.isVerifyCodeClick = true;
       const res = await api.getMsCode(this.phone);
-      console.log(res);
       if (res && res.code === 200) {
         this.showToast();
         this.setTimeCut();

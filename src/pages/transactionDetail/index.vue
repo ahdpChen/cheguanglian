@@ -15,7 +15,7 @@
           </li>
           <li>
             <span>交易时间</span>
-            <span>{{ selectedTransaction.createTime }}</span>
+            <span>{{ selectedTransaction.tranTime }}</span>
           </li>
           <li>
             <span>流水单号</span>

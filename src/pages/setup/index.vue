@@ -55,7 +55,6 @@ export default {
   },
   async onShow() {
     const res = await api.getEmployees();
-    console.log(res);
     if (res && res.code === 200) {
       this.employees = res.data.map(employ => {
         employ.formatePhone = this.phoneFilter(employ.account);

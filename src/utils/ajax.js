@@ -2,7 +2,6 @@ import fly from './config'
 import qs from 'qs'
 
 import config from '../config/config'
-import utils from '../utils'
 
 const host = config.host
 // const appKey = config.appKey
@@ -33,11 +32,6 @@ const get = (params) => {
 // 通用的post请求
 const post = (params) => {
   return fly.post(`${host}${params.url}`, qs.stringify(params.data))
-}
-
-// 校验手机号是否在系统登记
-const checkPhone = phoneNumber => {
-  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`)
 }
 
 /**
@@ -77,7 +71,7 @@ const checkPhone = phoneNumber => {
 
 // 获取验证码
 const getMsCode = phoneNumber => {
-  return fly.get(`/testApi/smCode?mPhone=${phoneNumber}`, null, {
+  return fly.get('/testApi/smCode', qs.stringify({ mPhone: phoneNumber }), {
     extra: {
       auth: false
     }
@@ -91,7 +85,7 @@ const getMsCode = phoneNumber => {
  * @param {*} smCode 后台根据手机号获取
  */
 export const login = (userphone, smCode, code) => {
-  return fly.post('/testApi/auth', utils.json2Form({ account: userphone, code, smCode }), {
+  return fly.post('/testApi/auth', qs.stringify({ account: userphone, code, smCode }), {
     extra: {
       auth: false
     }
@@ -108,7 +102,6 @@ export const getSelAd = () => {
  *{
  * detail:
  *  {
- *    carWashId,
  *    adOrderId,
  *    brand,
  *    region,
@@ -119,7 +112,7 @@ export const getSelAd = () => {
  * }
  */
 export const addConstruction = (params) => {
-  return fly.post('/testApi/ad/addConstruction', params)
+  return fly.post('/testApi/ad/addConstruction', JSON.stringify(params))
 }
 
 // 我的-获取一级权限用户的基本信息
@@ -134,12 +127,20 @@ export const getEmployees = () => {
 
 // 员工账户-删除员工
 export const deleteEmployee = (id) => {
-  return fly.post('/testApi/user/delete', utils.json2Form({ id }))
+  return fly.post('/testApi/user/delete', qs.stringify({ id }))
 }
 
 // 员工账户-新增或修改员工
-export const editEmployee = (name, phone) => {
-  return fly.post('/testApi/user/addOrUpdte', utils.json2Form({ name, phone }))
+/**
+ * params
+ * {
+ *  id: 新增不传修改传（暂时不考虑）
+ *  name
+ *  phone
+ * }
+ */
+export const editEmployee = (params) => {
+  return fly.post('/testApi/user/addOrUpdte', qs.stringify(params))
 }
 
 /**
@@ -149,14 +150,13 @@ export const editEmployee = (name, phone) => {
  * @param {*} limit (一页条数)
  */
 export const accountDetail = (type, offset, limit) => {
-  return fly.get(`/testApi/user/selectPageAccountDetail?type=${type}&offset=${offset}&limit=${limit}`)
+  return fly.get('/testApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
 }
 
 export default {
   get,
   post,
   // upLoadFile,
-  checkPhone,
   getMsCode,
   login,
   getSelAd,
