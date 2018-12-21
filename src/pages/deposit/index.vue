@@ -114,6 +114,9 @@ export default {
       this.acountInfo.reaMoney = avalidMoney;
     },
     beforeSubmit() {
+      if (!this.isEnabled || !this.isSubmit) {
+        return;
+      }
       this.handleSubmit(
         "温馨提示",
         "点击确定按钮后将立即申请提现，请注意查收。",
@@ -137,7 +140,7 @@ export default {
       });
     },
     async submit() {
-      if (!this.isEnabled || !this.isSubmit || this.isLoading) {
+      if (this.isLoading) {
         return;
       }
 
