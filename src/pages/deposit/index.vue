@@ -1,11 +1,11 @@
 <template>
   <div class="deposit-page">
     <div class="deposit-bank" @click="navigationToPage('addBankCard')">
-      <div class="bank-empty" v-if="!bankInfo">+添加银行卡</div>
-      <div class="bank-icon" v-if="bankInfo">
-        <img :src="bankIcon" alt />
+      <div class="bank-empty" v-if="!currBankInfo.bankName">+添加银行卡</div>
+      <div class="bank-icon" v-if="currBankInfo.iconUrl">
+        <img :src="currBankInfo.iconUrl" alt>
       </div>
-      <div class="bank-name" v-if="bankInfo">{{ bankInfo.bankName }}</div>
+      <div class="bank-name" v-if="currBankInfo.bankName">{{ currBankInfo.bankName }}</div>
       <div class="arrow"></div>
     </div>
     <div class="deposit-amount">
@@ -14,66 +14,170 @@
         id="money"
         type="number"
         v-model="acountInfo.reaMoney"
-        :placeholder="'可用余额￥'+acountInfo.avalidMoney"
+        :placeholder="'可用余额￥'+acountInfo.formateAvalidMoney"
         placeholder-style="font-size: 14px;color: #AEB3C0;"
       >
-      <div class="deposit-all">全部</div>
+      <div class="deposit-all" @click="fiilReaEqualAvalid">全部</div>
     </div>
-    <button class="submit" :class="{'isEnabled': acountInfo.isEnabled}">{{ submitText }}</button>
-    <div v-if="acountInfo.isEnabled" class="tips">提现后将于一个工作日后到账</div>
+    <button
+      class="submit"
+      :class="{ isEnabled: isEnabled && isSubmit }"
+      @click="beforeSubmit"
+    >{{ submitText }}</button>
+    <div v-if="isEnabled" class="tips">提现后将于一个工作日后到账</div>
   </div>
 </template>
 <script>
-import bankCarList from '../../../static/bankCar.json';
+import { mapActions } from "vuex";
+
+import bankCarList from "../../../static/bankCar.json";
+import api from "@/utils/ajax";
+import utils from "@/utils";
+
 export default {
   name: "deposit",
   data() {
     return {
       bankCarList: bankCarList.bankCar,
       bankInfo: {
-          bankIcon: 'bank_icon.png',
-          bankName: "中国银行1"
+        bankName: "",
+        bankNumber: ""
       },
       acountInfo: {
-        avalidMoney: "10,000",
+        avalidMoney: 0,
+        formateAvalidMoney: 0,
         reaMoney: "",
-        isEnabled: false
-      }
+        nowDate: ""
+      },
+      isLoading: false
     };
   },
   computed: {
-    bankIcon() {
-      const bank = this.bankCarList.filter((bank)=> {
-        return this.bankInfo.bankName === bank.name;
-      })[0]
-      const bankIcon = bank ? bank.icon : 'bank_icon.png'
-      return require(`~Image/images/bankCar/${bankIcon}`);
+    currBankInfo() {
+      let { bankName, bankNumber } = this.bankInfo;
+      if (!bankName || !bankNumber) {
+        return {};
+      }
+      console.log(this.bankInfo);
+      const bank = this.bankCarList.filter(bank => {
+        return bank.bankName.indexOf(bankName) > -1;
+      })[0];
+
+      if (bank) {
+        return Object.assign(bank, {
+          bankNumber,
+          iconUrl: require(`~Image/images/bankCar/${bank.icon}`)
+        });
+      } else {
+        return {
+          id: "-1",
+          icon: "bank_icon.png",
+          bankName,
+          bankNumber,
+          iconUrl: require("~Image/images/bankCar/bank_icon.png")
+        };
+      }
+    },
+    isEnabled() {
+      const weekDay = [
+        "星期天",
+        "星期一",
+        "星期二",
+        "星期三",
+        "星期四",
+        "星期五",
+        "星期六"
+      ];
+      return weekDay[this.acountInfo.nowDate] === "星期三";
+    },
+    isSubmit() {
+      let { avalidMoney, reaMoney } = this.acountInfo;
+      reaMoney = reaMoney || 0;
+      return parseFloat(reaMoney) > 0 && parseFloat(reaMoney) <= avalidMoney;
     },
     submitText() {
-      return this.acountInfo.isEnabled
-        ? "提现"
-        : "每周三为固定提现日，其他时间暂不支持";
+      return this.isEnabled ? "提现" : "每周三为固定提现日，其他时间暂不支持";
     }
   },
   methods: {
-    formatNumberWithComma(input) {
-      var type = typeof input;
-      var numStr = 0;
-      if (type == "number") {
-        numStr = parseInt(input).toString();
-      } else if (type == "string") {
-        numStr = input;
-      } else {
+    ...mapActions(["setBankIfo"]),
+    fiilReaEqualAvalid() {
+      const { avalidMoney } = this.acountInfo;
+      if (!avalidMoney) {
+        wx.showToast({
+          title: "没有可用的余额",
+          icon: "none",
+          duration: 2000
+        });
         return;
       }
-      return numStr.replace(/(?=(?!(\b))(\d{3})+$)/g, ",");
+      this.reaMoney = avalidMoney;
+    },
+    beforeSubmit() {
+      this.handleSubmit(
+        "温馨提示",
+        "点击确定按钮后将立即申请提现，请注意查收。",
+        "确定提现",
+        "取消",
+        this.submit
+      );
+    },
+    handleSubmit(title, content, confirmText, cancelText, callback) {
+      wx.showModal({
+        title,
+        content,
+        confirmText,
+        confirmColor: "#FD687D",
+        cancelText,
+        showCancel: !!cancelText,
+        success(res) {
+          console.log(res);
+          callback && callback();
+        }
+      });
+    },
+    async submit() {
+      if (!this.isEnabled || !this.isSubmit || this.isLoading) {
+        return;
+      }
+
+      this.isLoading = true;
+      const res = await api.doDepositSubmit(this.acountInfo.reaMoney);
+      this.isLoading = false;
+      console.log(res);
+      if (res && res.code === 200) {
+        this.handleSubmit(
+          "申请提现成功，敬请等待处理",
+          `提现金额 ¥${utils.formatNumberWithComma(
+            parseFloat(this.acountInfo.reaMoney || 0)
+          )}，预计1个工作日后到账${this.bankInfo.bankName}`,
+          "知道了",
+          "",
+          null
+        );
+      } else if (res && res.message) {
+        this.handleSubmit("温馨提示", res.message, "知道了", "", null);
+      }
     },
     navigationToPage(path) {
       let url = `../${path}/main`;
-      if(!this.bankInfo) {
-        url = `${url}?isCreate=true`
+      if (this.currBankInfo && this.currBankInfo.id) {
+        this.setBankIfo(this.currBankInfo);
+        url = `${url}?id=${this.currBankInfo.id}`;
       }
       wx.navigateTo({ url });
+    }
+  },
+  async onShow() {
+    const res = await api.getAmountAndBankCarInfo();
+    if (res && res.code === 200) {
+      const { bankName, bankNumber, totalBalance, nowDate } = res.data;
+      this.bankInfo = { bankName, bankNumber };
+      this.acountInfo.nowDate = new Date(nowDate.replace(/-/g, "/")).getDay(); //new Date().getDay()
+      this.acountInfo.avalidMoney = parseFloat(totalBalance || 0);
+      this.acountInfo.formateAvalidMoney = utils.formatNumberWithComma(
+        this.acountInfo.avalidMoney
+      );
     }
   }
 };

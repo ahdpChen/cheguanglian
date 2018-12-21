@@ -8,17 +8,33 @@ const json2Form = (json) => {
 }
 
 /** 金额格式化 */
-const formatNumberWithComma = (input) => {
-  var type = typeof input
-  var numStr = 0
+// const formatNumberWithComma = (input) => {
+//   var type = typeof input
+//   var numStr = 0
+//   if (type === 'number') {
+//     numStr = parseInt(input).toString()
+//   } else if (type === 'string') {
+//     numStr = input
+//   } else {
+//     return
+//   }
+//   return numStr.replace(/(?=(?!(\b))(\d{3})+$)/g, ',')
+// }
+
+/** 金额格式化 */
+const formatNumberWithComma = function (val) {
+  // 金额转换 元 保留2位小数 并每隔3位用逗号分开 1,234.56
+  var type = typeof val
+
   if (type === 'number') {
-    numStr = parseInt(input).toString()
-  } else if (type === 'string') {
-    numStr = input
+    var str = val.toFixed(2) + ''
+    var intSum = str.substring(0, str.indexOf('.')).replace(/\B(?=(?:\d{3})+$)/g, ',')// 取到整数部分
+    var dot = str.substring(str.length, str.indexOf('.'))// 取到小数部分搜索
+    var ret = intSum + dot
+    return ret
   } else {
-    return
+    return val
   }
-  return numStr.replace(/(?=(?!(\b))(\d{3})+$)/g, ',')
 }
 
 export default {

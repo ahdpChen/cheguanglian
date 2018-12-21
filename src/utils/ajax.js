@@ -97,6 +97,11 @@ export const getSelAd = () => {
   return fly.get('/testApi/ad/getSelAd')
 }
 
+// 首页-选择车牌和广告后校验是否有效
+export const validConstr = (detail) => {
+  return fly.get('/testApi/ad/validConstr', `detail=${JSON.stringify(detail)}`)
+}
+
 // 首页-添加广告施工
 /**
  *{
@@ -112,7 +117,7 @@ export const getSelAd = () => {
  * }
  */
 export const addConstruction = (params) => {
-  return fly.post('/testApi/ad/addConstruction', JSON.stringify(params))
+  return fly.post('/testApi/ad/addConstruction', `detail=${JSON.stringify(params.detail)}&picList=${JSON.stringify(params.picList)}`)
 }
 
 // 我的-获取一级权限用户的基本信息
@@ -153,6 +158,21 @@ export const accountDetail = (type, offset, limit) => {
   return fly.get('/testApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
 }
 
+// 提现-提现申请页面 返回银行卡信息和可用额度
+export const getAmountAndBankCarInfo = () => {
+  return fly.get('/testApi/user/withdrawaApply_page')
+}
+
+// 提现-添加或修改银行卡信息
+export const addBankInfo = (bankName, bankNo) => {
+  return fly.post('/testApi/user/addBankInfo', `bankName=${bankName}&bankNo=${bankNo}`)
+}
+
+// 提现-发起提现请求
+export const doDepositSubmit = (amount) => {
+  return fly.post('/testApi/user/withdrawaApply', qs.stringify({ amount }))
+}
+
 export default {
   get,
   post,
@@ -160,10 +180,14 @@ export default {
   getMsCode,
   login,
   getSelAd,
+  validConstr,
   addConstruction,
   getUserBaseInfo,
   getEmployees,
   deleteEmployee,
   editEmployee,
-  accountDetail
+  accountDetail,
+  getAmountAndBankCarInfo,
+  addBankInfo,
+  doDepositSubmit
 }

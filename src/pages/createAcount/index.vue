@@ -136,7 +136,7 @@ export default {
         this.$store.state.setUp.employees.filter(employ => {
           return employ.id === parseInt(id);
         })[0] || this.employData;
-      this.originData = JSON.parse(JSON.stringify(this.employData));
+      this.originData = Object.assign(this.originData, this.employData);
     }
   },
   mounted() {

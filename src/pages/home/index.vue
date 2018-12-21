@@ -49,7 +49,7 @@
         <div class="camera-extra" @click="camera" v-if="isGoOnTakePhoto">+ 继续拍照</div>
       </div>
     </scroll-view>
-    <button class="submit" v-if="chooseImages.length" @click="addConstruction">确认提交</button>
+    <button class="submit" v-if="chooseImages.length" @click="addConstruction(true)">确认提交</button>
 
     <base-modal customClass="select-modal" position="top" v-if="isClick" @showModal="selectIsClick">
       <div class="select-container">
@@ -109,7 +109,8 @@ export default {
       isUpLoading: false,
       isScroll: false,
       isClick: false,
-      isLicenseClick: false
+      isLicenseClick: false,
+      isLoading: false
     };
   },
   computed: {
@@ -149,6 +150,7 @@ export default {
       const _this = this;
       const loginInfoStr = wx.getStorageSync("LOGIN_INFO");
       const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null;
+      this.isUpLoading = true;
       const uploadTask = wx.uploadFile({
         url: `${config.host}/testApi/file/upload`,
         filePath: params.picture,
@@ -171,6 +173,7 @@ export default {
         complete() {
           wx.hideLoading();
           _this.progress = 0;
+          _this.isUpLoading = false;
         }
       });
       uploadTask.onProgressUpdate(res => {
@@ -181,6 +184,9 @@ export default {
       });
     },
     async camera() {
+      if(this.isUpLoading) {
+        return;
+      }
       let res = await this.takePhotoPromise();
       if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
@@ -210,6 +216,9 @@ export default {
     selectOption(option) {
       this.defaultAdvert = option;
       this.isClick = false;
+      // if(this.license) {
+      //   this.addConstruction(false);
+      // }
     },
     licenseIsClick() {
       this.isLicenseClick = !this.isLicenseClick;
@@ -221,9 +230,32 @@ export default {
     setLicense(e) {
       let { value } = e.target;
       this.license = value.toUpperCase();
+      const { adOrderId, brand } = this.defaultAdvert;
+      // if(adOrderId && brand) {
+      //   this.addConstruction(false);
+      // }
     },
-    async addConstruction() {
+    handleSubmit(content) {
+      wx.showModal({
+        title: "温馨提示",
+        content,
+        confirmText: "知道了",
+        confirmColor: '#FD687D',
+        showCancel: false,
+        success(res) {
+          console.log(res);
+        }
+      });
+    },
+    async addConstruction(isSubmit) {
+      if(this.isLoading) {
+        return;
+      }
       const { defaultAdvert: { adOrderId, brand }, scanLicense, chooseImages } = this;
+      if(!(adOrderId && brand)) {
+        this.$mptoast("请选择广告");
+        return;
+      }
       if (!this.license) {
         this.$mptoast("请输入车牌号");
         return;
@@ -235,10 +267,25 @@ export default {
           region: this.preLicense,
           carNumber: this.license,
           carNumberOld: scanLicense
-        },
-        picList: chooseImages.map(img => img.serverSrc)
+        }
       };
-      const res = await api.addConstruction(params);
+      if(isSubmit) {
+        params.picList = chooseImages.map(img => { return { picUrl: img.serverSrc } })
+        this.isLoading = true;
+        const res = await api.addConstruction(params);
+        this.isLoading = false;
+        console.log(res)
+        if(res && res.code === 200) {
+          this.handleSubmit('系统将在1个工作日内审核，审核通过后将收到补贴。');
+        }else if(res && res.message) {
+          this.handleSubmit(res.message)
+        }
+      }else {
+        this.isLoading = true;
+        const res = await api.validConstr(params);
+        this.isLoading = false;
+        console.log(res)
+      }
     }
   },
   async onShow() {
@@ -258,6 +305,13 @@ export default {
       });
       this.defaultAdvert = res.data[0];
       this.selectOptions = [].concat(res.data);
+    }
+  },
+  onShareAppMessage(res) {
+    console.log(res)
+    return {
+      title: '自定义转发标题',
+      path: '/pages/startApp/main'
     }
   },
   mounted() {

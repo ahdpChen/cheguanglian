@@ -41,7 +41,7 @@ import { mapActions } from "vuex";
 import mptoast from "mptoast";
 
 import api from "@/utils/ajax";
-import utils from '@/utils'
+import utils from '@/utils';
 
 export default {
   name: "my",
