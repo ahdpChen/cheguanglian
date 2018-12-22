@@ -81,6 +81,10 @@ export default {
         });
       }
     }
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
   }
 };
 </script>

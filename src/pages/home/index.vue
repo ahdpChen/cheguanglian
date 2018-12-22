@@ -15,7 +15,11 @@
         <div class="select-tip">选择已贴车贴</div>
         <div :class="{ fixed: isScroll }">
           <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
-            <div>{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</div>
+            <div>
+              <span
+                v-if="defaultAdvert"
+              >{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</span>
+            </div>
             <div class="arrow"></div>
           </div>
           <div class="car-license" v-if="chooseImages.length && !disabled">
@@ -84,14 +88,14 @@
   </div>
 </template>
 <script>
-import carJson from "./json/carLicense.json";
+import api from "@/utils/ajax";
+import config from "../../config/config";
+
 import subTitle from "@/components/subTitle";
 import baseModal from "@/components/baseModal";
 import selectOptionsModal from "./components/selectOptions";
 import licenseOptionsModal from "./components/licenseOptions";
-
-import api from "@/utils/ajax";
-import config from "../../config/config";
+import carLicense from "./data/carLicense";
 
 export default {
   name: "home",
@@ -105,7 +109,7 @@ export default {
     return {
       selectOptions: [],
       defaultAdvert: {},
-      licenseOptions: carJson.carLicense,
+      licenseOptions: carLicense,
       chooseImages: [],
       preLicense: "沪",
       license: "",
@@ -165,18 +169,20 @@ export default {
         filePath: params.picture,
         name: "file",
         header: {
-          "Content-type": "multipart/form-data",
-          Host: "www.cheguanglian.com:8080",
+          "Content-type": "multipart/form-data;charset=utf-8",
+          // "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+          Host: config.uploadFileHost,
           Authorization: `Bearer ${loginInfo.token}`
         },
         formData: {
           type: params.type
         },
         success(res) {
-          const data = JSON.parse(res.data).data;
+          const data = JSON.parse(res.data);
           _this.chooseImages[params.index].serverSrc = data.picUrl;
           if (data.number) {
             _this.scanLicense = data.number;
+            _this.confirmLicense(data.number);
           }
         },
         complete() {
@@ -190,6 +196,21 @@ export default {
         wx.showLoading({
           title: `已上传${this.progress}%`
         });
+      });
+    },
+    confirmLicense(licenseInfo) {
+      const _this = this;
+      wx.showModal({
+        title: "温馨提示",
+        content: `检测到上传的照片包含车牌号[${licenseInfo}]，是否替换？`,
+        confirmText: "确定",
+        confirmColor: "#545DFF",
+        success(res) {
+          if(res.confirm) {
+            _this.preLicense = licenseInfo.substr(0, 1);
+            _this.license = licenseInfo.substr(1);
+          }
+        }
       });
     },
     async camera() {
@@ -227,6 +248,15 @@ export default {
     selectOption(option) {
       this.defaultAdvert = option;
       this.isClick = false;
+
+      //广告结束提示
+      if (this.defaultAdvert.status === "3") {
+        wx.showToast({
+          title: "广告已结束，只能返店拍照",
+          icon: "none",
+          duration: 2000
+        });
+      }
       // if(this.license) {
       //   this.addConstruction(false);
       // }
@@ -246,7 +276,7 @@ export default {
       //   this.addConstruction(false);
       // }
     },
-    handleSubmit(content) {
+    handleSubmit(content, callback) {
       wx.showModal({
         title: "温馨提示",
         content,
@@ -254,7 +284,7 @@ export default {
         confirmColor: "#545DFF",
         showCancel: false,
         success(res) {
-          console.log(res);
+          callback && callback();
         }
       });
     },
@@ -316,23 +346,32 @@ export default {
             return { picUrl: img.serverSrc };
           });
           const res = await api.addConstruction(params);
-          console.log(res);
           if (res && res.code === 200) {
             this.handleSubmit(
-              "系统将在1个工作日内审核，审核通过后将收到补贴。"
+              "系统将在1个工作日内审核，审核通过后将收到补贴。",
+              this.clearData
             );
           } else if (res && res.message) {
-            this.handleSubmit(res.message);
+            this.handleSubmit(res.message, this.clearData);
           }
         } else {
           const res = await api.validConstr(params);
-          console.log(res);
+          // console.log(res);
         }
         this.isLoading = false;
       } catch (err) {
         console.log(err);
         this.isLoading = false;
+        this.clearData();
       }
+    },
+    clearData() {
+      this.defaultAdvert = this.selectOptions.filter(item => {
+        return !item.used;
+      })[0];
+      this.chooseImages = [];
+      this.license = "";
+      this.scanLicense = "";
     },
     // 获取广告下拉列表
     async getSelAd() {
@@ -341,6 +380,26 @@ export default {
       }
       const res = await api.getSelAd();
       if (res && res.code === 200) {
+        // res.data = res.data.concat([
+        //   {
+        //     adOrderId: 3,
+        //     adOrderNo: "GG201812211803x4ht",
+        //     brand: "冰红茶",
+        //     endTime: "2019-01-31 00:00:00",
+        //     minTimeLen: 40,
+        //     status: "2",
+        //     used: 1
+        //   },
+        //   {
+        //     adOrderId: 4,
+        //     adOrderNo: "GG201812211803x4ht",
+        //     brand: "迪迦",
+        //     endTime: "2019-01-31 00:00:00",
+        //     minTimeLen: 40,
+        //     status: "3",
+        //     used: 0
+        //   }
+        // ]);
         res.data.forEach(d => {
           if (d.minTimeLen > 30) {
             d.formateMinTimeLen = `${parseInt(
@@ -351,17 +410,6 @@ export default {
           }
           d.endTime = d.endTime.split(" ")[0];
         });
-        res.data = res.data.concat([
-          {
-            adOrderId: 3,
-            adOrderNo: "GG201812211803x4ht",
-            brand: "冰红茶",
-            endTime: "2019-01-31 00:00:00",
-            minTimeLen: 40,
-            status: "2",
-            used: 1
-          }
-        ]);
         this.defaultAdvert = res.data.filter(item => {
           return !item.used;
         })[0];
@@ -373,14 +421,11 @@ export default {
     this.getSelAd();
   },
   onShareAppMessage(res) {
-    console.log(res);
-    return {
-      title: "自定义转发标题",
-      path: "/pages/startApp/main"
-    };
+    let { share } = this.$store.state;
+    return share;
   },
   mounted() {
-    console.log("mounted");
+    // console.log("mounted");
   }
 };
 </script>

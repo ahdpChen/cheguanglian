@@ -79,8 +79,6 @@ export default {
         success(res) {
           if (res.confirm) {
             _this.deleteEmployee();
-          } else if (res.cancel) {
-            console.log("用户点击取消");
           }
         }
       });
@@ -99,7 +97,7 @@ export default {
       const { name, account } = this.employData;
       if (phoneReg.test(account)) {
         this.isLoading = true;
-        let params = { name, account };
+        let params = { name, phone: account };
         // if(this.originData.id) {
         //   params.id = this.originData.id;
         // }
@@ -139,8 +137,12 @@ export default {
       this.originData = Object.assign(this.originData, this.employData);
     }
   },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
   mounted() {
-    console.log("mounted");
+    // console.log("mounted");
   },
   onLoad() {
     Object.assign(this.$data, this.$options.data());

@@ -120,7 +120,6 @@ export default {
         tabIndex
       } = this;
       const res = await api.getAdvertList({ offset, limit, status });
-      console.log(res);
       if (res && res.code === 200) {
         const { rows, total } = res.data;
         this.advertList = rows.map(row => {
@@ -144,7 +143,7 @@ export default {
       } = row;
       let formateRow = {
         carNumber,
-        name: `${carNumber}|${brand}`,
+        name: `${carNumber} | ${brand}`,
         time: "",
         workTime: "",
         desc: ""
@@ -199,6 +198,13 @@ export default {
   },
   onShow() {
     this.getAdvertList();
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
+  onLoad() {
+    Object.assign(this.$data, this.$options.data());
   }
 };
 </script>

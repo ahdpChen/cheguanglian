@@ -86,7 +86,6 @@ export default {
         limit,
         search: searchText
       });
-      console.log(res);
       if (res && res.code === 200) {
         const { rows, total } = res.data;
         this.searchResult = rows.map(row => {
@@ -142,10 +141,13 @@ export default {
       return formateRow;
     },
     jumpPage(path, advertId) {
-      console.log(advertId);
       const url = `../${path}/main?advertId=${advertId}`;
       wx.navigateTo({ url });
     }
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
   },
   mounted() {}
 };

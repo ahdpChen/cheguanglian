@@ -76,8 +76,12 @@ export default {
   onShow() {
     this.getAdvertDetail();
   },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
   mounted() {
-    console.log("mounted");
+    // console.log("mounted");
   }
 };
 </script>

@@ -6,6 +6,8 @@ import advertItem from './module/advertItem'
 import setUp from './module/setUp'
 import transactions from './module/transactions'
 import deposit from './module/deposit'
+import share from './data/share'
+import bankCard from './data/bankCard'
 
 Vue.use(Vuex)
 
@@ -13,6 +15,8 @@ const store = new Vuex.Store({
   state: {
     loginInfo: {},
     userInfo: {},
+    share,
+    bankCard,
     isLogin: false
   },
   mutations: {

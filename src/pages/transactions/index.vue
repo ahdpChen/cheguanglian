@@ -17,7 +17,7 @@
       @scrolltolower="pullUploadMore"
     >
       <div class="scroll-wrap">
-        <div class="transaction-list">
+        <div class="transaction-list" v-if="transactionsData.length">
           <ul>
             <li
               v-for="(item, index) in transactionsData"
@@ -35,8 +35,12 @@
               <div class="arrow"></div>
             </li>
           </ul>
+          <div class="loadMore">{{loadMore? '加载更多': '没有更多了'}}</div>
         </div>
-        <div class="loadMore">{{loadMore? '加载更多': '没有更多了'}}</div>
+        <div v-else class="empty">
+          <p class="tip">暂无明细，继续加油！</p>
+          <img src="./images/empty.png" alt>
+        </div>
       </div>
     </scroll-view>
   </div>
@@ -130,6 +134,10 @@ export default {
     });
     this.getAccountDetail();
   },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
   mounted() {}
 };
 </script>
@@ -211,13 +219,34 @@ export default {
             }
           }
         }
+        .loadMore {
+          height: 60px;
+          line-height: 60px;
+          text-align: center;
+          font-size: 16px;
+          color: #1b1b4e;
+        }
       }
-      .loadMore {
-        height: 60px;
-        line-height: 60px;
-        text-align: center;
-        font-size: 16px;
-        color: #1b1b4e;
+      .empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: calc(100vh - 170px);
+        padding-bottom: 60px;
+        box-sizing: border-box;
+        .tip {
+          height: 60px;
+          line-height: 60px;
+          margin-bottom: 40px;
+          font-size: 14px;
+          text-align: center;
+          color: #aeb3c0;
+        }
+        img {
+          display: block;
+          width: 300px;
+        }
       }
     }
   }
