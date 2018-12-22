@@ -141,11 +141,7 @@ export default {
     },
     async submit() {
       const { bankName, bankNumber } = this.bankInfo;
-      wx.showLoading({
-        title: "加载中"
-      });
       const res = await api.addBankInfo(bankName, bankNumber);
-      wx.hideLoading();
       if (res && res.code === 200) {
         wx.showToast({
           title: "成功修改银行卡信息",

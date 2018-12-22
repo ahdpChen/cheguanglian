@@ -39,13 +39,11 @@
     </div>
     <button class="login-btn" @click="login">验证码</button>
     <base-toast toastType="info" toast="验证码已发送，请注意查收" @showToast="showToast" v-if="isToast"/>
-    <mptoast/>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
 
-import mptoast from "mptoast";
 import subTitle from "@/components/subTitle";
 import baseToast from "@/components/baseToast";
 import api from "@/utils/ajax";
@@ -53,7 +51,6 @@ import api from "@/utils/ajax";
 export default {
   name: "login",
   components: {
-    mptoast,
     baseToast,
     subTitle
   },
@@ -89,7 +86,11 @@ export default {
     },
     async getVerifyCode() {
       if (!this.isValid) {
-        this.$mptoast("请输入正确的手机号");
+        wx.showToast({
+          title: "请输入正确的手机号",
+          icon: "none",
+          duration: 2000
+        });
         return;
       }
       if (this.isVerifyCodeClick) {
@@ -107,7 +108,11 @@ export default {
         if (res.message.indexOf("手机号不存在") > -1) {
           this.phoneErr = "手机号未在系统登记";
         } else {
-          this.$mptoast(res.message);
+          wx.showToast({
+            title: res.message,
+            icon: "none",
+            duration: 2000
+          });
         }
         this.isVerifyCodeClick = false;
       } else {
@@ -145,11 +150,19 @@ export default {
     async login() {
       const { phone, verifyCode } = this;
       if (!this.isValid) {
-        this.$mptoast("请输入正确的手机号");
+        wx.showToast({
+          title: "请输入正确的手机号",
+          icon: "none",
+          duration: 2000
+        });
         return;
       }
       if (!verifyCode) {
-        this.$mptoast("请输入验证码");
+        wx.showToast({
+          title: "请输入验证码",
+          icon: "none",
+          duration: 2000
+        });
         return;
       }
       if (this.isSubmitClick) {
@@ -167,7 +180,11 @@ export default {
         if (res.message.indexOf("验证码") > -1) {
           this.vcErr = res.message;
         } else {
-          this.$mptoast(res.message);
+          wx.showToast({
+            title: res.message,
+            icon: "none",
+            duration: 2000
+          });
         }
       }
       this.isSubmitClick = false;

@@ -5,151 +5,202 @@
       scroll-y
       enable-back-to-top
       @scroll="scroll"
-      >
+      @scrolltolower="pullUploadMore"
+    >
       <div class="scroll-wrap">
         <div class="input-wrap">
-          <input type="text" placeholder="搜索车牌号/广告名" @click="jumpPage('searchAdvert')" />
+          <input type="text" placeholder="搜索车牌号/广告名" disabled @click="jumpPage('searchAdvert')">
         </div>
         <div class="advert-tab" :class="{ fixed: isScroll }">
           <ul>
             <li
-            :class="{ selected: advertTab.tabIndex === index }"
-            v-for="(tab, index) in advertTab.advertTabs"
-            :key="index"
-            @click="changeTab(index)"
-            >
-              {{ tab.name + tab.count }}
-            </li>
+              :class="{ selected: tabIndex === index }"
+              v-for="(tab, index) in advertTabs"
+              :key="index"
+              @click="changeTab(index)"
+            >{{ tab.name + tab.count }}</li>
           </ul>
         </div>
-        <div class="advert-list">
+        <div class="advert-list" v-if="advertList.length">
           <ul>
-            <li v-for="(advert, index) in advertList" :key="index" @click="jumpPage('advertItem', advert.advertId)">
+            <li
+              v-for="(advert, index) in advertList"
+              :key="index"
+              @click="jumpPage('advertItem', advert.carNumber)"
+            >
               <div class="advert-content">
                 <div class="advert-name">
                   <span>{{ advert.name }}</span>
                   <span>{{ advert.workTime }}</span>
                 </div>
                 <p class="advert-time">
-                  <span>{{ advert.desc }}</span>
+                  <span :class="{ re }">{{ advert.desc }}</span>
                   <span>{{ advert.time }}</span>
                 </p>
               </div>
               <div class="arrow"></div>
             </li>
           </ul>
+          <div class="loadMore">{{loadMore? '加载更多': '没有更多了'}}</div>
+        </div>
+        <div v-else class="empty">
+          <p class="tip">暂无广告，继续加油！</p>
+          <img src="./images/empty.png" alt>
         </div>
       </div>
     </scroll-view>
   </div>
 </template>
 <script>
+import api from "@/utils/ajax";
+
 export default {
-  name: 'advert',
-  data () {
+  name: "advert",
+  data() {
     return {
-      advertTab: {
-        advertTabs: [
-          {
-            id: 1,
-            name: '全部',
-            count: 2000
-          },
-          {
-            id: 2,
-            name: '广告中',
-            count: 1280
-          },
-          {
-            id: 3,
-            name: '空闲',
-            count: 720
-          }
-        ],
-        tabIndex: 0
-      },
-      advertList: [
+      advertTabs: [
         {
-          advertId: '1',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
+          id: 1,
+          name: "全部",
+          count: ""
         },
         {
-          advertId: '2',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
+          id: 2,
+          name: "广告中",
+          count: ""
         },
         {
-          advertId: '3',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '4',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '5',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '6',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '7',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '8',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '9',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
+          id: 3,
+          name: "空闲",
+          count: ""
         }
       ],
+      tabIndex: 0,
+      advertList: [],
+      pageParams: {
+        page: 1,
+        limit: 10,
+        total: 0
+      },
       isScroll: false
+    };
+  },
+  computed: {
+    offset() {
+      const { page, limit } = this.pageParams;
+      return (page - 1) * limit;
+    },
+    status() {
+      let status;
+      switch (this.tabIndex) {
+        case 0:
+          status = "";
+          break;
+        case 1:
+          status = "PASS";
+          break;
+        case 2:
+          status = "FINISHED";
+          break;
+        default:
+          status = "";
+      }
+      return status;
+    },
+    loadMore() {
+      return this.advertList.length < this.pageParams.total;
     }
   },
   methods: {
-    scroll (e) {
-      const { scrollTop } = e.mp.detail
-      this.isScroll = scrollTop > 60
+    async getAdvertList() {
+      const {
+        pageParams: { page, limit },
+        offset,
+        status,
+        tabIndex
+      } = this;
+      const res = await api.getAdvertList({ offset, limit, status });
+      console.log(res);
+      if (res && res.code === 200) {
+        const { rows, total } = res.data;
+        this.advertList = rows.map(row => {
+          return this.formateRows(row);
+        });
+        this.pageParams.total = total;
+        this.advertTabs[tabIndex].count = total;
+      }
     },
-    changeTab (index) {
-      this.advertTab.tabIndex = index
+    formateRows(row) {
+      const {
+        brand,
+        carNumber,
+        day,
+        minTimeLen,
+        exchangeMinLen,
+        firstPostdTime,
+        freeDay,
+        exchangePeriod,
+        isGetBT
+      } = row;
+      let formateRow = {
+        carNumber,
+        name: `${carNumber}|${brand}`,
+        time: "",
+        workTime: "",
+        desc: ""
+      };
+      if (this.status === "FINISHED") {
+        formateRow.workTime = `已空闲${freeDay}天`;
+        if (!isGetBT) {
+          formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+        }
+      } else {
+        let workTime = "";
+        let desc = "";
+        if (day < minTimeLen) {
+          workTime = `已贴${day}天 | 最少${minTimeLen}天`;
+          if (day < exchangeMinLen) {
+            desc = `差${exchangeMinLen - day}天可领取补贴`;
+          } else {
+            desc = `差${minTimeLen - day}天可更换广告`;
+          }
+        } else {
+          workTime = `已贴${day}|距结束${minTimeLen}`;
+        }
+        formateRow.workTime = workTime;
+        formateRow.desc = desc;
+        formateRow.time = firstPostdTime;
+      }
+      return formateRow;
     },
-    jumpPage (path, advertId) {
-      const url = `../${path}/main?advertId=${advertId}`
-      wx.navigateTo({ url })
+    scroll(e) {
+      const { scrollTop } = e.mp.detail;
+      this.isScroll = scrollTop > 60;
+    },
+    pullUploadMore() {
+      if (!this.loadMore) {
+        return;
+      }
+      this.pageParams.page++;
+      this.getAccountDetail();
+    },
+    changeTab(index) {
+      if (this.tabIndex === index) {
+        return;
+      }
+      this.tabIndex = index;
+      this.pageParams.page = 1;
+      this.getAdvertList();
+    },
+    jumpPage(path, carNumber) {
+      const url = `../${path}/main?carNumber=${carNumber}`;
+      wx.navigateTo({ url });
     }
+  },
+  onShow() {
+    this.getAdvertList();
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .advert-page {
@@ -161,7 +212,7 @@ export default {
     right: 0;
     bottom: 0;
     height: 100%;
-    overflow-y: scroll; 
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
     .scroll-wrap {
@@ -172,7 +223,7 @@ export default {
     width: 100%;
     height: 47px;
     margin-bottom: 10px;
-    background: #EBEBEB;
+    background: #ebebeb;
     border-radius: 10px;
     input {
       width: 100%;
@@ -198,17 +249,16 @@ export default {
         line-height: 40px;
         text-align: center;
         font-size: 14px;
-        color: #1B1B4E;
+        color: #1b1b4e;
         &.selected {
           font-size: 16px;
           color: #fff;
-          background: #545DFF;
+          background: #545dff;
           box-shadow: 0px 5px 15px rgba(84, 93, 255, 0.3);
           border-radius: 6px;
         }
       }
     }
-
   }
   .fixed {
     position: fixed;
@@ -241,19 +291,47 @@ export default {
             line-height: 24px;
           }
           .advert-name {
-            color: #1B1B4E;
+            color: #1b1b4e;
           }
           .advert-time {
-            color: #AEB3C0;
+            color: #aeb3c0;
           }
         }
         .arrow {
           width: 8px;
           height: 22px;
           margin-left: 24px;
-          background: url('./images/arrow.png') center/100% no-repeat;
+          background: url("./images/arrow.png") center/100% no-repeat;
         }
       }
+    }
+    .loadMore {
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      font-size: 16px;
+      color: #1b1b4e;
+    }
+  }
+  .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: calc(100vh - 170px);
+    padding-bottom: 60px;
+    box-sizing: border-box;
+    .tip {
+      height: 60px;
+      line-height: 60px;
+      margin-bottom: 40px;
+      font-size: 14px;
+      text-align: center;
+      color: #aeb3c0;
+    }
+    img {
+      display: block;
+      width: 300px;
     }
   }
 }

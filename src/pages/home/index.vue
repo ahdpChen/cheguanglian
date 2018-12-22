@@ -7,7 +7,8 @@
           <ul>
             <li>1. 已贴广告的车辆需贴满最小广告时长后才可换新广告，否则该车辆贴新广告的照片无法提交，敬请知悉</li>
             <li>
-              2. 在<span @click="jumpPage('advert', 'navigateTo')" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
+              2. 在
+              <span @click="jumpPage('advert', 'navigateTo')" class="navigation">“广告情况”</span>中可搜索查看各车辆广告张贴时长
             </li>
           </ul>
         </div>
@@ -17,7 +18,7 @@
             <div>{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</div>
             <div class="arrow"></div>
           </div>
-          <div class="car-license" v-if="chooseImages.length">
+          <div class="car-license" v-if="chooseImages.length && !disabled">
             <div class="license-left" @click="licenseIsClick">
               <span>{{ preLicense }}</span>
               <div class="arrow"></div>
@@ -27,7 +28,7 @@
             </div>
           </div>
         </div>
-        <div class="camera-wrap" @click="camera" v-if="!chooseImages.length">
+        <div class="camera-wrap" @click="camera" v-if="!chooseImages.length && !disabled">
           <div>
             <p class="title">点此广告拍照</p>
             <p>照片中需清晰可见广告与车牌</p>
@@ -35,7 +36,7 @@
           </div>
           <div class="camera-icon"></div>
         </div>
-        <div class="choose-imgs" v-if="chooseImages.length">
+        <div class="choose-imgs" v-if="chooseImages.length && !disabled">
           <div class="choose-img-wrap" v-for="(item, index) in chooseImages" :key="index">
             <img :src="item.src" alt>
             <img
@@ -46,10 +47,18 @@
             >
           </div>
         </div>
-        <div class="camera-extra" @click="camera" v-if="isGoOnTakePhoto">+ 继续拍照</div>
+        <div class="camera-extra" @click="camera" v-if="isGoOnTakePhoto && !disabled">+ 继续拍照</div>
+        <div class="operate-err" v-if="disabled">
+          <p>该广告的贴纸您已全部用完</p>
+          <p>请尽快联系我们</p>
+        </div>
       </div>
     </scroll-view>
-    <button class="submit" v-if="chooseImages.length" @click="addConstruction(true)">确认提交</button>
+    <button
+      class="submit"
+      v-if="chooseImages.length && !disabled"
+      @click="addConstruction(true)"
+    >确认提交</button>
 
     <base-modal customClass="select-modal" position="top" v-if="isClick" @showModal="selectIsClick">
       <div class="select-container">
@@ -72,12 +81,9 @@
         <span></span>
       </div>
     </base-modal>
-    <mptoast/>
   </div>
 </template>
 <script>
-import mptoast from "mptoast";
-
 import carJson from "./json/carLicense.json";
 import subTitle from "@/components/subTitle";
 import baseModal from "@/components/baseModal";
@@ -90,7 +96,6 @@ import config from "../../config/config";
 export default {
   name: "home",
   components: {
-    mptoast,
     subTitle,
     baseModal,
     selectOptionsModal,
@@ -110,7 +115,8 @@ export default {
       isScroll: false,
       isClick: false,
       isLicenseClick: false,
-      isLoading: false
+      isLoading: false,
+      isTakingPhoto: false
     };
   },
   computed: {
@@ -123,6 +129,9 @@ export default {
         this.chooseImages.length &&
         this.chooseImages.length < 3
       );
+    },
+    disabled() {
+      return !!this.defaultAdvert.used;
     }
   },
   methods: {
@@ -140,7 +149,7 @@ export default {
             res(data);
           },
           fail(err) {
-            rej(err);
+            res(err);
           },
           complete() {}
         });
@@ -184,10 +193,12 @@ export default {
       });
     },
     async camera() {
-      if(this.isUpLoading) {
+      if (this.isUpLoading) {
         return;
       }
+      this.isTakingPhoto = true;
       let res = await this.takePhotoPromise();
+      this.isTakingPhoto = false;
       if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
         this.chooseImages = this.chooseImages.concat([
@@ -240,79 +251,133 @@ export default {
         title: "温馨提示",
         content,
         confirmText: "知道了",
-        confirmColor: '#FD687D',
+        confirmColor: "#545DFF",
         showCancel: false,
         success(res) {
           console.log(res);
         }
       });
     },
+    checkSubmitParams(adOrderId, brand, license, disabled) {
+      if (!(adOrderId && brand)) {
+        wx.showToast({
+          title: "请选择广告",
+          icon: "none",
+          duration: 2000
+        });
+        return false;
+      }
+      if (!license) {
+        wx.showToast({
+          title: "请输入车牌号",
+          icon: "none",
+          duration: 2000
+        });
+        return false;
+      }
+      if (disabled) {
+        wx.showToast({
+          title: "该广告的贴纸已用完",
+          icon: "none",
+          duration: 2000
+        });
+        return false;
+      }
+      return true;
+    },
     async addConstruction(isSubmit) {
-      if(this.isLoading) {
-        return;
-      }
-      const { defaultAdvert: { adOrderId, brand }, scanLicense, chooseImages } = this;
-      if(!(adOrderId && brand)) {
-        this.$mptoast("请选择广告");
-        return;
-      }
-      if (!this.license) {
-        this.$mptoast("请输入车牌号");
+      const {
+        defaultAdvert: { adOrderId, brand },
+        license,
+        disabled,
+        preLicense,
+        scanLicense,
+        chooseImages
+      } = this;
+      if (
+        this.isLoading ||
+        !this.checkSubmitParams(adOrderId, brand, license, disabled)
+      ) {
         return;
       }
       let params = {
         detail: {
           adOrderId,
           brand,
-          region: this.preLicense,
-          carNumber: this.license,
+          region: preLicense,
+          carNumber: license,
           carNumberOld: scanLicense
         }
       };
-      if(isSubmit) {
-        params.picList = chooseImages.map(img => { return { picUrl: img.serverSrc } })
-        this.isLoading = true;
-        const res = await api.addConstruction(params);
-        this.isLoading = false;
-        console.log(res)
-        if(res && res.code === 200) {
-          this.handleSubmit('系统将在1个工作日内审核，审核通过后将收到补贴。');
-        }else if(res && res.message) {
-          this.handleSubmit(res.message)
+      this.isLoading = true;
+      try {
+        if (isSubmit) {
+          params.picList = chooseImages.map(img => {
+            return { picUrl: img.serverSrc };
+          });
+          const res = await api.addConstruction(params);
+          console.log(res);
+          if (res && res.code === 200) {
+            this.handleSubmit(
+              "系统将在1个工作日内审核，审核通过后将收到补贴。"
+            );
+          } else if (res && res.message) {
+            this.handleSubmit(res.message);
+          }
+        } else {
+          const res = await api.validConstr(params);
+          console.log(res);
         }
-      }else {
-        this.isLoading = true;
-        const res = await api.validConstr(params);
         this.isLoading = false;
-        console.log(res)
+      } catch (err) {
+        console.log(err);
+        this.isLoading = false;
+      }
+    },
+    // 获取广告下拉列表
+    async getSelAd() {
+      if (this.isTakingPhoto) {
+        return;
+      }
+      const res = await api.getSelAd();
+      if (res && res.code === 200) {
+        res.data.forEach(d => {
+          if (d.minTimeLen > 30) {
+            d.formateMinTimeLen = `${parseInt(
+              d.minTimeLen / 30
+            )}个月${d.minTimeLen % 30}天`;
+          } else {
+            d.formateMinTimeLen = `${d.minTimeLen}天`;
+          }
+          d.endTime = d.endTime.split(" ")[0];
+        });
+        res.data = res.data.concat([
+          {
+            adOrderId: 3,
+            adOrderNo: "GG201812211803x4ht",
+            brand: "冰红茶",
+            endTime: "2019-01-31 00:00:00",
+            minTimeLen: 40,
+            status: "2",
+            used: 1
+          }
+        ]);
+        this.defaultAdvert = res.data.filter(item => {
+          return !item.used;
+        })[0];
+        this.selectOptions = [].concat(res.data);
       }
     }
   },
-  async onShow() {
-    console.log("onShow");
-    // 获取广告下拉列表
-    const res = await api.getSelAd();
-    if (res && res.code === 200) {
-      res.data.forEach(d => {
-        if (d.minTimeLen > 30) {
-          d.formateMinTimeLen = `${parseInt(
-            d.minTimeLen / 30
-          )}个月${d.minTimeLen % 30}天`;
-        } else {
-          d.formateMinTimeLen = `${d.minTimeLen}天`;
-        }
-        d.endTime = d.endTime.split(" ")[0];
-      });
-      this.defaultAdvert = res.data[0];
-      this.selectOptions = [].concat(res.data);
-    }
+  onShow() {
+    this.getSelAd();
   },
   onShareAppMessage(res) {
-    console.log(res)
+    console.log(res);
     return {
-      title: '自定义转发标题',
-      path: '/pages/startApp/main'
-    }
+      title: "自定义转发标题",
+      path: "/pages/startApp/main"
+    };
   },
   mounted() {
     console.log("mounted");
@@ -509,6 +574,25 @@ export default {
     font-size: 16px;
     font-weight: 700;
     color: #545dff;
+  }
+  .operate-err {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100px;
+    padding: 0 10px 0 20px;
+    color: #ff3750;
+    font-size: 14px;
+    box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
+    border-radius: 10px;
+    box-sizing: border-box;
+    p {
+      & + p {
+        margin-top: 10px;
+      }
+    }
   }
   .submit {
     position: fixed;

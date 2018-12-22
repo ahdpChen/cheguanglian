@@ -105,15 +105,15 @@ export const validConstr = (detail) => {
 // 首页-添加广告施工
 /**
  *{
- * detail:
- *  {
- *    adOrderId,
- *    brand,
- *    region,
- *    carNumber,
- *    carNumberOld
- *  },
- * picList
+ *  detail:
+ *   {
+ *     adOrderId,
+ *     brand,
+ *     region,
+ *     carNumber,
+ *     carNumberOld
+ *   },
+ *  picList
  * }
  */
 export const addConstruction = (params) => {
@@ -173,6 +173,30 @@ export const doDepositSubmit = (amount) => {
   return fly.post('/testApi/user/withdrawaApply', qs.stringify({ amount }))
 }
 
+/**
+ * 广告情况-获取广告列表
+ * @param {*} params
+ * offset (当前页起始值)
+ * limit (一页条数)
+ * status (PASS：广告中， FINISHED:结束 ，空：全部)
+ * brand  (广告名)
+ * carNumber (车牌号)
+ */
+export const getAdvertList = (params) => {
+  return fly.get('/testApi/user/selectPageConstrsOrder', qs.stringify(params))
+}
+
+// 广告情况-洗车店已施工的广告
+export const getAdListByCarNumber = (carNumber) => {
+  return fly.get('/testApi/user/selectAdListByCarNumber', qs.stringify({carNumber}))
+}
+
+// 广告情况-广告施工详情
+
+export const getAdDetail = (id) => {
+  return fly.get('/testApi/ad/getConstrAdDetail', qs.stringify({id}))
+}
+
 export default {
   get,
   post,
@@ -189,5 +213,8 @@ export default {
   accountDetail,
   getAmountAndBankCarInfo,
   addBankInfo,
-  doDepositSubmit
+  doDepositSubmit,
+  getAdvertList,
+  getAdListByCarNumber,
+  getAdDetail
 }
