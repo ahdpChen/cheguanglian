@@ -202,6 +202,9 @@ export default {
   onShareAppMessage(res) {
     let { share } = this.$store.state;
     return share;
+  },
+  onLoad() {
+    Object.assign(this.$data, this.$options.data());
   }
 };
 </script>
