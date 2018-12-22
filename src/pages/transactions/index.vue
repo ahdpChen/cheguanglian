@@ -36,7 +36,7 @@
             </li>
           </ul>
         </div>
-        <div class="loadMore" @click="getMore">{{loadMore? '加载更多': '没有更多了'}}</div>
+        <div class="loadMore">{{loadMore? '加载更多': '没有更多了'}}</div>
       </div>
     </scroll-view>
   </div>
@@ -84,16 +84,12 @@ export default {
   methods: {
     ...mapActions(["settransactions"]),
     async getAccountDetail() {
-      wx.showLoading({
-        title: "加载中"
-      });
       const {
         tabIndex,
         offset,
         pageParams: { page, limit }
       } = this;
       const res = await api.accountDetail(tabIndex, offset, limit);
-      wx.hideLoading();
       if (res && res.code === 200) {
         const currData = page === 1 ? [] : this.transactionsData;
         const { rows, total } = res.data;

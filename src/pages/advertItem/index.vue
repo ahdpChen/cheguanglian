@@ -2,9 +2,14 @@
   <div class="advertItem-page">
     <scroll-view class="scroll-container" scroll-y enable-back-to-top>
       <div class="scroll-wrap">
-        <div class="advertItem-list gray" v-for="(item,index) in advertItem" :key="index" @click="jumpPage(index)">
+        <div
+          class="advertItem-list gray"
+          v-for="(item, index) in advertItem"
+          :key="index"
+          @click="jumpPage(item.id)"
+        >
           <div class="flex">
-            <div>广告牌</div>
+            <div>广告品牌</div>
             <div>{{ item.advertBrand }}</div>
           </div>
           <div class="flex">
@@ -17,7 +22,7 @@
           <div class="flex">
             <div>
               返厂拍照
-              <span>({{ item.state }})</span>
+              <span>({{ item.status }})</span>
             </div>
             <div>
               {{ item.secondTime }}
@@ -31,77 +36,62 @@
         </div>
       </div>
     </scroll-view>
-
-    <!-- <button @click="jumpPage">广告item</button> -->
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import api from "@/utils/ajax";
+
 export default {
   name: "advertItem",
   data() {
     return {
-      advertItem: [
-        {
-          advertBrand: "雪花1",
-          state: "审核中",
-          desc: "",
-          photos: [
-            "https://image.guazistatic.com/gz01180628/15/47/d500e47b172c6ca758994346b7360279.jpg@base@tag=imgScale&w=280&h=180&q=55&q=100&w=750&h=480",
-            "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1558500903,1181850262&fm=26&gp=0.jpg",
-            "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1827303848,2651994092&fm=26&gp=0.jpg"
-          ],
-          photoMan: "尼古拉斯·赵四",
-          phone: "13512341234",
-          firstTime: "2018-12-13",
-          secondTime: "2018-12-14",
-          endTime: "2018-12-15"
-        },
-        {
-          advertBrand: "雪花2",
-          state: "未通过",
-          desc: "xxxxxx，若图片作弊将受处罚，敬请配合",
-          photos: [
-            "https://image.guazistatic.com/gz01180628/15/47/d500e47b172c6ca758994346b7360279.jpg@base@tag=imgScale&w=280&h=180&q=55&q=100&w=750&h=480",
-            "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1558500903,1181850262&fm=26&gp=0.jpg",
-            "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1827303848,2651994092&fm=26&gp=0.jpg"
-          ],
-          photoMan: "尼古拉斯·赵四",
-          phone: "13512341234",
-          firstTime: "2018-12-13",
-          secondTime: "2018-12-14",
-          endTime: "2018-12-15"
-        },
-        {
-          advertBrand: "雪花3",
-          state: "审核中",
-          desc: "",
-          photos: [
-            "https://image.guazistatic.com/gz01180628/15/47/d500e47b172c6ca758994346b7360279.jpg@base@tag=imgScale&w=280&h=180&q=55&q=100&w=750&h=480",
-            "https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1558500903,1181850262&fm=26&gp=0.jpg",
-            "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1827303848,2651994092&fm=26&gp=0.jpg"
-          ],
-          photoMan: "尼古拉斯·赵四",
-          phone: "13512341234",
-          firstTime: "2018-12-13",
-          secondTime: "2018-12-14",
-          endTime: "2018-12-15"
-        }
-      ]
+      advertItem: []
     };
   },
   methods: {
-    ...mapActions(["setAdvertItem"]),
-    jumpPage(advertIndex) {
-      const url = `../advertDetail/main?advertIndex=${advertIndex}`;
+    async initData() {
+      const { carNumber } = this.$root.$mp.query;
+      const res = await api.getAdListByCarNumber(carNumber);
+      console.log(res);
+      if (res && res.code === 200) {
+        //请求成功
+        const { carNumber, adNum, list } = res.data;
+        this.advertItem = list.map(item => {
+          return this.formateData(item);
+        });
+        wx.setNavigationBarTitle({
+          title: `${carNumber}/${adNum}次广告`
+        });
+      } else if (res && res.message) {
+        wx.showToast({
+          title: res.message,
+          icon: "none",
+          duration: 2000
+        });
+      }
+    },
+    formateData(item) {
+      const { id, brand, status, firstPostdTime, createTime, endTime } = item;
+      let formateItem = {
+        id,
+        advertBrand: brand,
+        status,
+        firstTime: firstPostdTime,
+        secondTime: createTime,
+        endTime
+      };
+      return formateItem;
+    },
+    jumpPage(id) {
+      const url = `../advertDetail/main?id=${id}`;
       wx.navigateTo({ url });
     }
   },
+  onShow() {
+    this.initData();
+  },
   mounted() {
-    wx.setNavigationBarTitle({
-      title: `沪GY2715/${this.advertItem.length}次广告`
-    });
-    this.setAdvertItem(this.advertItem);
+    console.log("mounted");
   }
 };
 </script>
@@ -118,7 +108,7 @@ export default {
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
     .scroll-wrap {
-      padding: 0 30px;
+      padding: 0 20px;
       .advertItem-list {
         background: #ffffff;
         box-shadow: 0px 5px 15px rgba(27, 27, 78, 0.1);
@@ -129,7 +119,7 @@ export default {
           align-items: center;
           justify-content: space-between;
           height: 60px;
-          padding: 0 20px;
+          padding: 0 15px;
           > div {
             line-height: 24px;
             font-size: 14px;

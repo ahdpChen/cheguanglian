@@ -4,7 +4,7 @@
       <div class="scroll-wrap">
         <div class="advertDetail-list">
           <div class="flex">
-            <div>广告牌</div>
+            <div>广告品牌</div>
             <div>{{ advertDetail.advertBrand }}</div>
           </div>
           <div class="flex">
@@ -16,10 +16,10 @@
             <div>{{ advertDetail.photoMan + '/' + advertDetail.phone }}</div>
           </div>
         </div>
-        <div class="advertDetail-msg">照片审核中</div>
+        <div class="advertDetail-msg" v-if="advertDetail.desc">{{ advertDetail.desc }}</div>
         <div class="detail-imgs" v-if="advertDetail.photos.length">
           <div class="detail-imgs-wrap" v-for="(src,index) in advertDetail.photos" :key="index">
-            <img :src="src" alt="" srcset="">
+            <img :src="src" alt srcset>
           </div>
         </div>
       </div>
@@ -27,32 +27,57 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import api from "@/utils/ajax";
+
 export default {
   name: "advertDetail",
   data() {
     return {
       advertDetail: {
         advertBrand: "",
-          state: "",
-          desc: "",
-          photos: [],
-          photoMan: "",
-          phone: "",
-          firstTime: "",
-          secondTime: "",
-          endTime: ""
+        firstTime: "",
+        photoMan: "",
+        phone: "",
+        desc: "",
+        photos: []
       }
     };
   },
-  methods: {},
+  methods: {
+    async getAdvertDetail() {
+      const { id } = this.$root.$mp.query;
+      const res = await api.getAdDetail(id);
+      if (res && res.code === 200) {
+        const {
+          detail: {
+            carNumber,
+            brand,
+            firstPostdTime,
+            consUserName,
+            consUserPhone,
+            remark
+          },
+          picList
+        } = res.data;
+        this.advertDetail = Object.assign(this.advertDetail, {
+          advertBrand: brand,
+          firstTime: firstPostdTime,
+          photoMan: consUserName,
+          phone: consUserPhone,
+          desc: remark,
+          photos: picList
+        });
+        wx.setNavigationBarTitle({
+          title: carNumber
+        });
+      }
+    }
+  },
+  onShow() {
+    this.getAdvertDetail();
+  },
   mounted() {
-    this.advertDetail = this.$store.state.advertItem.advertItem[
-      this.$root.$mp.query.advertIndex
-    ];
-    wx.setNavigationBarTitle({
-      title: "沪GY2715"
-    });
+    console.log("mounted");
   }
 };
 </script>
@@ -112,7 +137,7 @@ export default {
           border-radius: 10px;
           box-sizing: border-box;
           overflow: hidden;
-          img{
+          img {
             width: 100%;
             height: 100%;
           }

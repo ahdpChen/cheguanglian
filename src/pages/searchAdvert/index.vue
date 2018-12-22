@@ -1,11 +1,11 @@
 <template>
   <div class="search-page">
     <div class="input-wrap">
-      <input type="text" placeholder="搜索车牌号/广告名" v-model="searchText">
+      <input type="text" placeholder="搜索车牌号/广告名" v-model="searchText" @input="beforeSearch">
     </div>
     <scroll-view class="scroll-container" scroll-y enable-back-to-top @scroll="scroll">
       <div class="scroll-wrap">
-        <ul>
+        <ul v-if="searchResult.length">
           <li
             v-for="(advert, index) in searchResult"
             :key="index"
@@ -24,11 +24,13 @@
             <div class="arrow"></div>
           </li>
         </ul>
+        <div class="empty" v-if="isSearching && !searchResult.length">未搜索到相关车辆/广告</div>
       </div>
     </scroll-view>
   </div>
 </template>
 <script>
+import api from "@/utils/ajax";
 // 节流函数
 const delay = (function() {
   let timer = 0;
@@ -42,83 +44,110 @@ export default {
   data() {
     return {
       searchText: "",
-      searchResult: [
-        {
-          advertId: '1',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '2',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '3',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '4',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '5',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '6',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '7',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '8',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        },
-        {
-          advertId: '9',
-          name: '沪GY2715|雪花',
-          workTime: '已贴20天|最少30天',
-          time: '2018-12-12 :12:30:20',
-          desc: '差2天可领取补贴'
-        }
-      ]
+      searchResult: [],
+      pageParams: {
+        page: 1,
+        limit: 10,
+        total: 0
+      }
     };
   },
+  computed: {
+    offset() {
+      const { page, limit } = this.pageParams;
+      return (page - 1) * limit;
+    },
+    loadMore() {
+      return this.searchResult.length < this.pageParams.total;
+    },
+    isSearching() {
+      return !!this.searchText.replace(/^\s+|\s+$/g, "");
+    }
+  },
   methods: {
+    beforeSearch() {
+      delay(this.search, 500);
+    },
+    async search() {
+      this.pageParams.page = 1;
+      const {
+        searchText,
+        pageParams: { limit },
+        offset,
+        isSearching
+      } = this;
+      if (!isSearching) {
+        this.searchResult = [];
+        this.pageParams.total = 0;
+        return;
+      }
+      const res = await api.getAdvertList({
+        offset,
+        limit,
+        search: searchText
+      });
+      console.log(res);
+      if (res && res.code === 200) {
+        const { rows, total } = res.data;
+        this.searchResult = rows.map(row => {
+          return this.formateRows(row);
+        });
+        this.pageParams.total = total;
+      } else {
+        this.searchResult = [];
+        this.pageParams.total = 0;
+      }
+    },
+    formateRows(row) {
+      const {
+        brand,
+        carNumber,
+        day,
+        minTimeLen,
+        exchangeMinLen,
+        firstPostdTime,
+        freeDay,
+        exchangePeriod,
+        isGetBT
+      } = row;
+      let formateRow = {
+        carNumber,
+        name: `${carNumber}|${brand}`,
+        time: "",
+        workTime: "",
+        desc: ""
+      };
+      if (this.status === "FINISHED") {
+        formateRow.workTime = `已空闲${freeDay}天`;
+        if (!isGetBT) {
+          formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+        }
+      } else {
+        let workTime = "";
+        let desc = "";
+        if (day < minTimeLen) {
+          workTime = `已贴${day}天 | 最少${minTimeLen}天`;
+          if (day < exchangeMinLen) {
+            desc = `差${exchangeMinLen - day}天可领取补贴`;
+          } else {
+            desc = `差${minTimeLen - day}天可更换广告`;
+          }
+        } else {
+          workTime = `已贴${day}|距结束${minTimeLen}`;
+        }
+        formateRow.workTime = workTime;
+        formateRow.desc = desc;
+        formateRow.time = firstPostdTime;
+      }
+      return formateRow;
+    },
     jumpPage(path, advertId) {
       console.log(advertId);
       const url = `../${path}/main?advertId=${advertId}`;
       wx.navigateTo({ url });
     }
   },
-  mounted() {
-
-  }
+  mounted() {}
 };
 </script>
 <style lang="scss" scoped>
@@ -180,6 +209,13 @@ export default {
             background: url("./images/arrow.png") center/100% no-repeat;
           }
         }
+      }
+      .empty {
+        height: 60px;
+        line-height: 60px;
+        font-size: 14px;
+        text-align: center;
+        color: #aeb3c0;
       }
     }
   }

@@ -33,21 +33,16 @@
         </li>
       </ul>
     </div>
-    <mptoast/>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
-import mptoast from "mptoast";
 
 import api from "@/utils/ajax";
-import utils from '@/utils';
+import utils from "@/utils";
 
 export default {
   name: "my",
-  conponents: {
-    mptoast
-  },
   data() {
     return {
       userBaseInfo: {}
@@ -68,14 +63,22 @@ export default {
   async onShow() {
     if (this.isTopLevel) {
       const res = await api.getUserBaseInfo();
-      if(res && res.code === 200) {
+      if (res && res.code === 200) {
         this.userBaseInfo = Object.assign(res.data, {
-          formateTotalAmount: utils.formatNumberWithComma(res.data.totailAmount),
-          formateTotalBalance: utils.formatNumberWithComma(res.data.totalBalance)
-        })
-        this.setUserInfo(this.userBaseInfo)
-      } else if(res && res.message === '非法操作') {
-        this.$mptoast(res.message);
+          formateTotalAmount: utils.formatNumberWithComma(
+            res.data.totailAmount
+          ),
+          formateTotalBalance: utils.formatNumberWithComma(
+            res.data.totalBalance
+          )
+        });
+        this.setUserInfo(this.userBaseInfo);
+      } else if (res && res.message) {
+        wx.showToast({
+          title: res.message,
+          icon: "none",
+          duration: 2000
+        });
       }
     }
   }
