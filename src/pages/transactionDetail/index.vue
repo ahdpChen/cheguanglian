@@ -49,6 +49,10 @@ export default {
         return transaction.id === parseInt(id);
       }
     )[0];
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
   }
 };
 </script>

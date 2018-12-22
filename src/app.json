@@ -24,14 +24,14 @@
       {
         "pagePath": "pages/home/main",
         "text": "首页",
-        "iconPath": "static/pie.png",
-        "selectedIconPath": "static/pie_active.png"
+        "iconPath": "static/images/tabBar/pie.png",
+        "selectedIconPath": "static/images/tabBar/pie_active.png"
       },
       {
         "pagePath": "pages/my/main",
         "text": "我的",
-        "iconPath": "static/settings.png",
-        "selectedIconPath": "static/settings_active.png"
+        "iconPath": "static/images/tabBar/settings.png",
+        "selectedIconPath": "static/images/tabBar/settings_active.png"
       }
     ]
   },

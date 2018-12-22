@@ -52,7 +52,6 @@ export default {
     async initData() {
       const { carNumber } = this.$root.$mp.query;
       const res = await api.getAdListByCarNumber(carNumber);
-      console.log(res);
       if (res && res.code === 200) {
         //请求成功
         const { carNumber, adNum, list } = res.data;
@@ -90,8 +89,12 @@ export default {
   onShow() {
     this.initData();
   },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
   mounted() {
-    console.log("mounted");
+    // console.log("mounted");
   }
 };
 </script>

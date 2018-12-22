@@ -203,6 +203,10 @@ export default {
     showModal() {
       this.isModal = !this.isModal;
     }
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
   }
 };
 </script>

@@ -36,7 +36,7 @@ fly.interceptors.request.use((request) => {
     } else {
       // 统一处理没有token跳转登陆页
       const url = '../login/main'
-      wx.redirectTo({url})
+      wx.redirectTo({ url })
     }
   }
 
@@ -53,14 +53,19 @@ fly.interceptors.request.use((request) => {
 fly.interceptors.response.use(
   (response) => {
     wx.hideLoading()
+    const { data: { code } } = response
+    // 统一处理没有token或者token失效跳转登陆页
+    if (code && code === 700) {
+      wx.clearStorageSync()
+      const url = '../login/main'
+      wx.redirectTo({ url })
+    }
     // 只将请求结果的data字段返回
     return response.data
   },
   // eslint-disable-next-line handle-callback-err
   (err) => {
-    // wx.hideLoading()
     // 发生网络错误
-    console.log(err)
     if (err && err.message) {
       wx.showToast({
         title: err.message || '网络错误',

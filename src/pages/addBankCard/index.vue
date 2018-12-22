@@ -35,7 +35,6 @@
   </div>
 </template>
 <script>
-import bankCarList from "../../../static/bankCar.json";
 import baseModal from "@/components/baseModal";
 import bankCardListModal from "./components/bankCardList";
 
@@ -49,7 +48,6 @@ export default {
   },
   data() {
     return {
-      bankCarList: bankCarList.bankCar,
       bankInfo: {
         id: "",
         icon: "",
@@ -69,6 +67,9 @@ export default {
     };
   },
   computed: {
+    bankCarList() {
+      return this.$store.state.bankCard
+    },
     formateBankInfo() {
       return this.bankCarList.map(bank => {
         return Object.assign(bank, {
@@ -116,7 +117,6 @@ export default {
           confirmText: "确定修改",
           confirmColor: "#FD687D",
           success(res) {
-            console.log(res);
             resolve(res.confirm);
           },
           fail(err) {
@@ -171,8 +171,12 @@ export default {
     }
     this.bankInfo = Object.assign(this.bankInfo, bankInfo);
   },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
+  },
   mounted() {
-    console.log("mounted");
+    // console.log("mounted");
   }
 };
 </script>

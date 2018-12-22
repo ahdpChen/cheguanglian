@@ -9,7 +9,7 @@
       <div class="arrow"></div>
     </div>
     <div class="deposit-amount">
-      <label for="money">提现金额</label>
+      <label for="money">提现金额 ￥</label>
       <input
         id="money"
         type="number"
@@ -30,7 +30,6 @@
 <script>
 import { mapActions } from "vuex";
 
-import bankCarList from "../../../static/bankCar.json";
 import api from "@/utils/ajax";
 import utils from "@/utils";
 
@@ -38,7 +37,6 @@ export default {
   name: "deposit",
   data() {
     return {
-      bankCarList: bankCarList.bankCar,
       bankInfo: {
         bankName: "",
         bankNumber: ""
@@ -53,12 +51,14 @@ export default {
     };
   },
   computed: {
+    bankCarList() {
+      return this.$store.state.bankCard;
+    },
     currBankInfo() {
       let { bankName, bankNumber } = this.bankInfo;
       if (!bankName || !bankNumber) {
         return {};
       }
-      console.log(this.bankInfo);
       const bank = this.bankCarList.filter(bank => {
         return bank.bankName.indexOf(bankName) > -1;
       })[0];
@@ -134,8 +134,9 @@ export default {
         cancelText,
         showCancel: !!cancelText,
         success(res) {
-          console.log(res);
-          callback && callback();
+          if (res.confirm) {
+            callback && callback();
+          }
         }
       });
     },
@@ -147,7 +148,6 @@ export default {
       this.isLoading = true;
       const res = await api.doDepositSubmit(this.acountInfo.reaMoney);
       this.isLoading = false;
-      console.log(res);
       if (res && res.code === 200) {
         this.handleSubmit(
           "申请提现成功，敬请等待处理",
@@ -182,6 +182,10 @@ export default {
         this.acountInfo.avalidMoney
       );
     }
+  },
+  onShareAppMessage(res) {
+    let { share } = this.$store.state;
+    return share;
   }
 };
 </script>
@@ -244,7 +248,7 @@ export default {
     }
     input {
       flex: 1;
-      padding-left: 20px;
+      padding-left: 10px;
     }
     .deposit-all {
       color: #fd687d;
