@@ -9,7 +9,7 @@
           <li
             v-for="(advert, index) in searchResult"
             :key="index"
-            @click="jumpPage('advertItem', advert.advertId)"
+            @click="jumpPage('advertItem', advert.carNumber)"
           >
             <div class="advert-content">
               <div class="advert-name">
@@ -140,8 +140,8 @@ export default {
       }
       return formateRow;
     },
-    jumpPage(path, advertId) {
-      const url = `../${path}/main?advertId=${advertId}`;
+    jumpPage(path, carNumber) {
+      const url = `../${path}/main?carNumber=${carNumber}`;
       wx.navigateTo({ url });
     }
   },

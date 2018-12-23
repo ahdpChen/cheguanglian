@@ -65,7 +65,9 @@ export default {
           photoMan: consUserName,
           phone: consUserPhone,
           desc: remark,
-          photos: picList
+          photos: picList.map(item => {
+            return item.picUrl;
+          })
         });
         wx.setNavigationBarTitle({
           title: carNumber
@@ -144,6 +146,7 @@ export default {
           img {
             width: 100%;
             height: 100%;
+            border-radius: 10px;
           }
         }
       }

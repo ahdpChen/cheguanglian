@@ -121,10 +121,13 @@ export default {
       } = this;
       const res = await api.getAdvertList({ offset, limit, status });
       if (res && res.code === 200) {
+        const currData = page === 1 ? [] : this.advertList;
         const { rows, total } = res.data;
-        this.advertList = rows.map(row => {
-          return this.formateRows(row);
-        });
+        this.advertList = currData.concat(
+          rows.map(row => {
+            return this.formateRows(row);
+          })
+        );
         this.pageParams.total = total;
         this.advertTabs[tabIndex].count = total;
       }
@@ -197,6 +200,7 @@ export default {
     }
   },
   onShow() {
+    this.pageParams.page = 1;
     this.getAdvertList();
   },
   onShareAppMessage(res) {
