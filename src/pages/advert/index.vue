@@ -34,7 +34,7 @@
                   <span>{{ advert.workTime }}</span>
                 </div>
                 <p class="advert-time">
-                  <span :class="{ re }">{{ advert.desc }}</span>
+                  <span :class="{ red: advert.isRed }">{{ advert.desc }}</span>
                   <span>{{ advert.time }}</span>
                 </p>
               </div>
@@ -149,12 +149,14 @@ export default {
         name: `${carNumber} | ${brand}`,
         time: "",
         workTime: "",
-        desc: ""
+        desc: "",
+        isRed: false
       };
       if (this.status === "FINISHED") {
         formateRow.workTime = `已空闲${freeDay}天`;
         if (!isGetBT) {
           formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+          formateRow.isRed = true;
         }
       } else {
         let workTime = "";
@@ -299,12 +301,15 @@ export default {
             justify-content: space-between;
             font-size: 14px;
             line-height: 24px;
-          }
-          .advert-name {
-            color: #1b1b4e;
-          }
-          .advert-time {
             color: #aeb3c0;
+            span {
+              &:first-child {
+                color: #1b1b4e;
+              }
+              &.red {
+                color: #fd687d;
+              }
+            }
           }
         }
         .arrow {

@@ -3,7 +3,8 @@
     <scroll-view class="scroll-container" scroll-y enable-back-to-top>
       <div class="scroll-wrap">
         <div
-          class="advertItem-list gray"
+          class="advertItem-list"
+          :class="{ gray: item.status === 'UNPASS' || item.status === 'FINISHED' }"
           v-for="(item, index) in advertItem"
           :key="index"
           @click="jumpPage(item.id)"
@@ -13,16 +14,23 @@
             <div>{{ item.advertBrand }}</div>
           </div>
           <div class="flex">
-            <div>首次拍照</div>
+            <div>
+              首次拍照
+              <span
+                :class="{ 'unpass': item.statusClass }"
+                v-if="item.type === 'FIRST'"
+              >({{ item.statusString }})</span>
+              <span class="pass" v-else>(审核通过)</span>
+            </div>
             <div>
               {{ item.firstTime }}
               <div class="arrow"></div>
             </div>
           </div>
-          <div class="flex">
+          <div class="flex" v-if="item.type !== 'FIRST'">
             <div>
-              返厂拍照
-              <span>({{ item.status }})</span>
+              返店拍照
+              <span :class="{ 'unpass': item.statusClass }">({{ item.statusString }})</span>
             </div>
             <div>
               {{ item.secondTime }}
@@ -70,16 +78,47 @@ export default {
       }
     },
     formateData(item) {
-      const { id, brand, status, firstPostdTime, createTime, endTime } = item;
+      const {
+        id,
+        brand,
+        status,
+        type,
+        firstPostdTime,
+        createTime,
+        endTime
+      } = item;
       let formateItem = {
         id,
         advertBrand: brand,
         status,
+        statusString: this.getStatusString(status),
+        statusClass: status === 'UNPASS' || status === 'FINISHED',
+        type,
         firstTime: firstPostdTime,
         secondTime: createTime,
         endTime
       };
       return formateItem;
+    },
+    getStatusString(status) {
+      let statusStr = "";
+      switch (status) {
+        case "UNAUDITED":
+          statusStr = "审核中";
+          break;
+        case "PASS":
+          statusStr = "审核通过";
+          break;
+        case "UNPASS":
+          statusStr = "审核未通过";
+          break;
+        case "FINISHED":
+          statusStr = "已结束";
+          break;
+        default:
+          statusStr = "";
+      }
+      return statusStr;
     },
     jumpPage(id) {
       const url = `../advertDetail/main?id=${id}`;
@@ -127,6 +166,13 @@ export default {
             line-height: 24px;
             font-size: 14px;
             color: #1b1b4e;
+            span {
+              color: #545dff;
+
+              &.unpass {
+                color: #fd687d;
+              }
+            }
             &:last-child {
               flex: 1;
               display: flex;

@@ -17,7 +17,7 @@
           <div class="select-wrap" :class="{ selected: isClick }" @click="selectIsClick">
             <div>
               <span
-                v-if="defaultAdvert"
+                v-if="defaultAdvert.brand"
               >{{ defaultAdvert.brand }} ({{defaultAdvert.formateMinTimeLen}}起，{{defaultAdvert.endTime}}结束)</span>
             </div>
             <div class="arrow"></div>
@@ -135,7 +135,7 @@ export default {
       );
     },
     disabled() {
-      return !!this.defaultAdvert.used;
+      return this.defaultAdvert && !!this.defaultAdvert.used;
     }
   },
   methods: {
@@ -414,8 +414,8 @@ export default {
         });
         this.defaultAdvert = res.data.filter(item => {
           return !item.used;
-        })[0];
-        this.selectOptions = [].concat(res.data);
+        })[0] || {};
+        this.selectOptions = [].concat(res.data || []);
       }
     }
   },

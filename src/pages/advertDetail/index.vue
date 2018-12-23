@@ -7,9 +7,13 @@
             <div>广告品牌</div>
             <div>{{ advertDetail.advertBrand }}</div>
           </div>
-          <div class="flex">
+          <div class="flex" v-if="advertDetail.type === 'FIRST'">
             <div>首次拍照</div>
             <div>{{ advertDetail.firstTime }}</div>
+          </div>
+          <div class="flex" v-else>
+            <div>返店拍照</div>
+            <div>{{ advertDetail.secondTime }}</div>
           </div>
           <div class="flex">
             <div>拍照人员</div>
@@ -19,7 +23,7 @@
         <div class="advertDetail-msg" v-if="advertDetail.desc">{{ advertDetail.desc }}</div>
         <div class="detail-imgs" v-if="advertDetail.photos.length">
           <div class="detail-imgs-wrap" v-for="(src,index) in advertDetail.photos" :key="index">
-            <img :src="src" alt srcset>
+            <img :src="src" alt>
           </div>
         </div>
       </div>
@@ -35,7 +39,9 @@ export default {
     return {
       advertDetail: {
         advertBrand: "",
+        type: "",
         firstTime: "",
+        secondTime: '',
         photoMan: "",
         phone: "",
         desc: "",
@@ -52,7 +58,9 @@ export default {
           detail: {
             carNumber,
             brand,
+            type,
             firstPostdTime,
+            createTime,
             consUserName,
             consUserPhone,
             remark
@@ -61,7 +69,9 @@ export default {
         } = res.data;
         this.advertDetail = Object.assign(this.advertDetail, {
           advertBrand: brand,
+          type,
           firstTime: firstPostdTime,
+          secondTime: createTime,
           photoMan: consUserName,
           phone: consUserPhone,
           desc: remark,
