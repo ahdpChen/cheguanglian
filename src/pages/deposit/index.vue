@@ -88,6 +88,9 @@ export default {
         "星期五",
         "星期六"
       ];
+      if (process.env.NODE_ENV === "development") {
+        return true;
+      }
       return weekDay[this.acountInfo.nowDate] === "星期三";
     },
     isSubmit() {
@@ -114,7 +117,16 @@ export default {
       this.acountInfo.reaMoney = avalidMoney;
     },
     beforeSubmit() {
+      const { bankName, bankNumber } = this.bankInfo;
       if (!this.isEnabled || !this.isSubmit) {
+        return;
+      }
+      if (!bankName || !bankNumber) {
+        wx.showToast({
+          title: "银行卡信息不完整",
+          icon: "none",
+          duration: 2000
+        });
         return;
       }
       this.handleSubmit(
@@ -169,19 +181,22 @@ export default {
         url = `${url}?id=${this.currBankInfo.id}`;
       }
       wx.navigateTo({ url });
+    },
+    async getAmountAndBankCarInfo() {
+      const res = await api.getAmountAndBankCarInfo();
+      if (res && res.code === 200) {
+        const { bankName, bankNumber, totalBalance, nowDate } = res.data;
+        this.bankInfo = { bankName, bankNumber };
+        this.acountInfo.nowDate = new Date(nowDate.replace(/-/g, "/")).getDay(); //new Date().getDay()
+        this.acountInfo.avalidMoney = parseFloat(totalBalance || 0);
+        this.acountInfo.formateAvalidMoney = utils.formatNumberWithComma(
+          this.acountInfo.avalidMoney
+        );
+      }
     }
   },
-  async onShow() {
-    const res = await api.getAmountAndBankCarInfo();
-    if (res && res.code === 200) {
-      const { bankName, bankNumber, totalBalance, nowDate } = res.data;
-      this.bankInfo = { bankName, bankNumber };
-      this.acountInfo.nowDate = new Date(nowDate.replace(/-/g, "/")).getDay(); //new Date().getDay()
-      this.acountInfo.avalidMoney = parseFloat(totalBalance || 0);
-      this.acountInfo.formateAvalidMoney = utils.formatNumberWithComma(
-        this.acountInfo.avalidMoney
-      );
-    }
+  onShow() {
+    this.getAmountAndBankCarInfo();
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;
