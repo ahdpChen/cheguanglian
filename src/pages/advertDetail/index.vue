@@ -23,7 +23,7 @@
         <div class="advertDetail-msg" v-if="advertDetail.desc">{{ advertDetail.desc }}</div>
         <div class="detail-imgs" v-if="advertDetail.photos.length">
           <div class="detail-imgs-wrap" v-for="(src,index) in advertDetail.photos" :key="index">
-            <img :src="src" alt srcset>
+            <img :src="src" alt>
           </div>
         </div>
       </div>
