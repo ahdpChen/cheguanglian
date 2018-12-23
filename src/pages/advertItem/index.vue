@@ -13,7 +13,10 @@
             <div>{{ item.advertBrand }}</div>
           </div>
           <div class="flex">
-            <div>首次拍照</div>
+            <div>
+              首次拍照
+              <span>({{ item.type === 'FIRST'? item.status: '审核通过' }})</span>
+            </div>
             <div>
               {{ item.firstTime }}
               <div class="arrow"></div>
@@ -70,7 +73,15 @@ export default {
       }
     },
     formateData(item) {
-      const { id, brand, status, type, firstPostdTime, createTime, endTime } = item;
+      const {
+        id,
+        brand,
+        status,
+        type,
+        firstPostdTime,
+        createTime,
+        endTime
+      } = item;
       let formateItem = {
         id,
         advertBrand: brand,
