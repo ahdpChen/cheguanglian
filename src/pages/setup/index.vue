@@ -40,7 +40,10 @@ export default {
   },
   computed: {
     userInfo() {
-      return this.$store.state.userInfo;
+      let { userInfo } = this.$store.state;
+      return Object.assign(userInfo, {
+        account: this.phoneFilter(userInfo.account)
+      });
     }
   },
   methods: {
@@ -51,17 +54,20 @@ export default {
     jumpPage(id) {
       const url = `../createAcount/main?id=${id}`;
       wx.navigateTo({ url });
+    },
+    async getEmployees() {
+      const res = await api.getEmployees();
+      if (res && res.code === 200) {
+        this.employees = res.data.map(employ => {
+          employ.formatePhone = this.phoneFilter(employ.account);
+          return employ;
+        });
+        this.setemployees(this.employees);
+      }
     }
   },
-  async onShow() {
-    const res = await api.getEmployees();
-    if (res && res.code === 200) {
-      this.employees = res.data.map(employ => {
-        employ.formatePhone = this.phoneFilter(employ.account);
-        return employ;
-      });
-      this.setemployees(this.employees);
-    }
+  onShow() {
+    this.getEmployees();
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;

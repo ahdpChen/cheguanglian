@@ -59,29 +59,32 @@ export default {
     navigationToPage(path) {
       const url = `../${path}/main`;
       wx.navigateTo({ url });
-    }
-  },
-  async onShow() {
-    if (this.isTopLevel) {
-      const res = await api.getUserBaseInfo();
-      if (res && res.code === 200) {
-        this.userBaseInfo = Object.assign(res.data, {
-          formateTotalAmount: utils.formatNumberWithComma(
-            res.data.totailAmount
-          ),
-          formateTotalBalance: utils.formatNumberWithComma(
-            res.data.totalBalance
-          )
-        });
-        this.setUserInfo(this.userBaseInfo);
-      } else if (res && res.message) {
-        wx.showToast({
-          title: res.message,
-          icon: "none",
-          duration: 2000
-        });
+    },
+    async getUserBaseInfo() {
+      if (this.isTopLevel) {
+        const res = await api.getUserBaseInfo();
+        if (res && res.code === 200) {
+          this.userBaseInfo = Object.assign(res.data, {
+            formateTotalAmount: utils.formatNumberWithComma(
+              res.data.totailAmount
+            ),
+            formateTotalBalance: utils.formatNumberWithComma(
+              res.data.totalBalance
+            )
+          });
+          this.setUserInfo(this.userBaseInfo);
+        } else if (res && res.message) {
+          wx.showToast({
+            title: res.message,
+            icon: "none",
+            duration: 2000
+          });
+        }
       }
     }
+  },
+  onShow() {
+    this.getUserBaseInfo();
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;

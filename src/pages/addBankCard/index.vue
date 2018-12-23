@@ -68,7 +68,7 @@ export default {
   },
   computed: {
     bankCarList() {
-      return this.$store.state.bankCard
+      return this.$store.state.bankCard;
     },
     formateBankInfo() {
       return this.bankCarList.map(bank => {
@@ -155,21 +155,24 @@ export default {
     },
     selectIsClick() {
       this.isClick = !this.isClick;
+    },
+    initData() {
+      const { id } = this.$root.$mp.query;
+      wx.setNavigationBarTitle({
+        title: id ? "修改银行卡" : "添加银行卡"
+      });
+      let bankInfo = {};
+      if (id) {
+        bankInfo = this.$store.state.deposit.bankInfo;
+        this.originData = Object.assign(this.originData, bankInfo);
+      } else {
+        bankInfo = this.formateBankInfo[0];
+      }
+      this.bankInfo = Object.assign(this.bankInfo, bankInfo);
     }
   },
   onShow() {
-    const { id } = this.$root.$mp.query;
-    wx.setNavigationBarTitle({
-      title: id ? "修改银行卡" : "添加银行卡"
-    });
-    let bankInfo = {};
-    if (id) {
-      bankInfo = this.$store.state.deposit.bankInfo;
-      this.originData = Object.assign(this.originData, bankInfo);
-    } else {
-      bankInfo = this.formateBankInfo[0];
-    }
-    this.bankInfo = Object.assign(this.bankInfo, bankInfo);
+    this.initData();
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;

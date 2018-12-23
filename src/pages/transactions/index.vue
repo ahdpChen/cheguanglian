@@ -128,7 +128,7 @@ export default {
       wx.navigateTo({ url });
     }
   },
-  async onShow() {
+  onShow() {
     wx.setNavigationBarTitle({
       title: "明细"
     });
