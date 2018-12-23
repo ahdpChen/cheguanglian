@@ -149,7 +149,9 @@ export default {
     let { share } = this.$store.state;
     return share;
   },
-  mounted() {}
+  onLoad() {
+    Object.assign(this.$data, this.$options.data());
+  }
 };
 </script>
 <style lang="scss" scoped>
