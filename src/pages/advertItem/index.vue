@@ -98,7 +98,6 @@ export default {
         secondTime: createTime,
         endTime
       };
-      console.log(formateItem)
       return formateItem;
     },
     getStatusString(status) {
