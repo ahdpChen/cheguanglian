@@ -132,6 +132,7 @@ export default {
     wx.setNavigationBarTitle({
       title: "明细"
     });
+    this.pageParams.page = 1;
     this.getAccountDetail();
   },
   onShareAppMessage(res) {

@@ -42,9 +42,9 @@ export default {
         bankNumber: ""
       },
       acountInfo: {
-        avalidMoney: 0,
-        formateAvalidMoney: 0,
         reaMoney: "",
+        avalidMoney: 0,
+        formateAvalidMoney: "",
         nowDate: ""
       },
       isLoading: false
@@ -168,7 +168,7 @@ export default {
           )}，预计1个工作日后到账${this.bankInfo.bankName}`,
           "知道了",
           "",
-          null
+          this.getAmountAndBankCarInfo
         );
       } else if (res && res.message) {
         this.handleSubmit("温馨提示", res.message, "知道了", "", null);
@@ -187,11 +187,14 @@ export default {
       if (res && res.code === 200) {
         const { bankName, bankNumber, totalBalance, nowDate } = res.data;
         this.bankInfo = { bankName, bankNumber };
-        this.acountInfo.nowDate = new Date(nowDate.replace(/-/g, "/")).getDay(); //new Date().getDay()
-        this.acountInfo.avalidMoney = parseFloat(totalBalance || 0);
-        this.acountInfo.formateAvalidMoney = utils.formatNumberWithComma(
-          this.acountInfo.avalidMoney
-        );
+        this.acountInfo = {
+          reaMoney: "",
+          avalidMoney: parseFloat(totalBalance || 0),
+          formateAvalidMoney: utils.formatNumberWithComma(
+            parseFloat(totalBalance || 0)
+          ),
+          nowDate: new Date(nowDate.replace(/-/g, "/")).getDay()
+        };
       }
     }
   },

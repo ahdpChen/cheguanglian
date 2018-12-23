@@ -3,11 +3,11 @@
     <div class="account-wrap" v-if="isTopLevel">
       <div class="account">
         <span>账户余额</span>
-        <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
+        <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
       </div>
       <div class="total">
         <span>总收入（{{ userBaseInfo.day || '1日' }}）</span>
-        <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
+        <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
       </div>
     </div>
     <div class="operate-btn" v-if="isTopLevel">
