@@ -65,6 +65,7 @@ fly.interceptors.response.use(
   },
   // eslint-disable-next-line handle-callback-err
   (err) => {
+    wx.hideLoading()
     // 发生网络错误
     if (err && err.message) {
       wx.showToast({

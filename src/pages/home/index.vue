@@ -182,13 +182,16 @@ export default {
           _this.chooseImages[params.index].serverSrc = data.picUrl;
           if (data.number) {
             _this.scanLicense = data.number;
-            _this.confirmLicense(data.number);
+            _this.preLicense = data.number.substr(0, 1);
+            _this.license = data.number.substr(1);
+            // _this.confirmLicense(data.number);
           }
         },
         complete() {
           wx.hideLoading();
           _this.progress = 0;
           _this.isUpLoading = false;
+          _this.isTakingPhoto = false;
         }
       });
       uploadTask.onProgressUpdate(res => {
@@ -206,7 +209,7 @@ export default {
         confirmText: "确定",
         confirmColor: "#545DFF",
         success(res) {
-          if(res.confirm) {
+          if (res.confirm) {
             _this.preLicense = licenseInfo.substr(0, 1);
             _this.license = licenseInfo.substr(1);
           }
@@ -219,7 +222,6 @@ export default {
       }
       this.isTakingPhoto = true;
       let res = await this.takePhotoPromise();
-      this.isTakingPhoto = false;
       if (res && res.tempFilePaths.length) {
         const tempFilePaths = res.tempFilePaths;
         this.chooseImages = this.chooseImages.concat([
@@ -335,7 +337,7 @@ export default {
           adOrderId,
           brand,
           region: preLicense,
-          carNumber: license,
+          carNumber: `${preLicense}${license}`,
           carNumberOld: scanLicense
         }
       };

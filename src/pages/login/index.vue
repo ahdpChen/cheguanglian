@@ -37,7 +37,7 @@
         @click.stop="getVerifyCode"
       >{{verifyCodeText}}</button>
     </div>
-    <button class="login-btn" @click="login">验证码</button>
+    <button class="login-btn" @click="login">验证</button>
     <base-toast toastType="info" toast="验证码已发送，请注意查收" @showToast="showToast" v-if="isToast"/>
   </div>
 </template>
