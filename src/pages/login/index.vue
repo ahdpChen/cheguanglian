@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <subTitle subTitle="登录"/>
-    <div class="login-tip">请输入登记在车广联的手机号码，用于验证身份</div>
+    <div class="login-tip">请输入登记在车广家的手机号码，用于验证身份</div>
     <div class="input-wrap">
       <label :class="{ err: phoneErr }" for="phone">
         <span>手机号</span>
