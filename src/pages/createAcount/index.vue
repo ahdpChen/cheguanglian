@@ -125,17 +125,20 @@ export default {
           callback && _this.jumpPage({ delta: 1 }, "navigateBack");
         }
       });
+    },
+    initData() {
+      const { id } = this.$root.$mp.query;
+      if (id) {
+        this.employData =
+          this.$store.state.setUp.employees.filter(employ => {
+            return employ.id === parseInt(id);
+          })[0] || this.employData;
+        this.originData = Object.assign(this.originData, this.employData);
+      }
     }
   },
   onShow() {
-    const { id } = this.$root.$mp.query;
-    if (id) {
-      this.employData =
-        this.$store.state.setUp.employees.filter(employ => {
-          return employ.id === parseInt(id);
-        })[0] || this.employData;
-      this.originData = Object.assign(this.originData, this.employData);
-    }
+    this.initData();
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;
