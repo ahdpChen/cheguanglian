@@ -6,7 +6,7 @@
         <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
       </div>
       <div class="total">
-        <span>总收入（{{ userBaseInfo.day }}）</span>
+        <span>总收入（{{ userBaseInfo.day || '1日' }}）</span>
         <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
       </div>
     </div>
@@ -27,7 +27,8 @@
           <div class="icon"></div>
           <div class="middle">
             <span>账号设置</span>
-            <span>{{ userBaseInfo.peopleNum }}个员工账号</span>
+            <span v-if="userBaseInfo.peopleNum">{{ userBaseInfo.peopleNum }}个员工账号</span>
+            <span v-else>暂无员工账号</span>
           </div>
           <div class="arrow"></div>
         </li>

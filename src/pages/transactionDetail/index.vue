@@ -21,7 +21,7 @@
             <span>流水单号</span>
             <span>{{ selectedTransaction.flowCode }}</span>
           </li>
-          <li>
+          <li v-if="selectedTransaction.type === '提现'">
             <span>银行卡</span>
             <span>{{ selectedTransaction.rmark }}</span>
           </li>
