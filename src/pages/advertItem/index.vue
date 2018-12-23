@@ -19,9 +19,9 @@
               <div class="arrow"></div>
             </div>
           </div>
-          <div class="flex">
+          <div class="flex" v-if="item.type !== 'FIRST'">
             <div>
-              返厂拍照
+              返店拍照
               <span>({{ item.status }})</span>
             </div>
             <div>
@@ -70,11 +70,12 @@ export default {
       }
     },
     formateData(item) {
-      const { id, brand, status, firstPostdTime, createTime, endTime } = item;
+      const { id, brand, status, type, firstPostdTime, createTime, endTime } = item;
       let formateItem = {
         id,
         advertBrand: brand,
         status,
+        type,
         firstTime: firstPostdTime,
         secondTime: createTime,
         endTime
