@@ -40,7 +40,10 @@ export default {
   },
   computed: {
     userInfo() {
-      return this.$store.state.userInfo;
+      let { userInfo } = this.$store.state;
+      return Object.assign(userInfo, {
+        account: this.phoneFilter(userInfo.account)
+      });
     }
   },
   methods: {
