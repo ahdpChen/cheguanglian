@@ -15,6 +15,7 @@
           <li
             v-for="(advert, index) in searchResult"
             :key="index"
+            v-if="defaultType.typeId === 1 || (defaultType.typeId === 2 && !advert.isFromOtherShop)"
             @click="jumpPage('advertItem', advert)"
           >
             <div class="advert-content">
