@@ -25,6 +25,10 @@
             <span>银行卡</span>
             <span>{{ selectedTransaction.rmark }}</span>
           </li>
+          <li v-if="selectedTransaction.type === '补贴'">
+            <span>车牌号</span>
+            <span>{{ selectedTransaction.carNumber }}</span>
+          </li>
           <li>
             <span>状态</span>
             <span>{{ selectedTransaction.status }}</span>

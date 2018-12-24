@@ -372,6 +372,7 @@ export default {
         return !item.used;
       })[0];
       this.chooseImages = [];
+      this.preLicense = '沪';
       this.license = "";
       this.scanLicense = "";
     },
