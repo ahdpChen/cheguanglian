@@ -169,7 +169,7 @@ export default {
             desc = `差${minTimeLen - day}天可更换广告`;
           }
         } else {
-          workTime = `已贴${day}|距结束${minTimeLen}`;
+          workTime = `已贴${day} | 距结束${minTimeLen}`;
         }
         formateRow.workTime = workTime;
         formateRow.desc = desc;

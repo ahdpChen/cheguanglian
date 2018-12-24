@@ -1,7 +1,13 @@
 <template>
   <div class="search-page">
-    <div class="input-wrap">
-      <input type="text" placeholder="搜索车牌号/广告名" v-model="searchText" @input="beforeSearch">
+    <div class="search-wrap">
+      <div class="search-type" @click="searchKeyClick">
+        <span>{{ defaultType.typeText }}</span>
+        <div class="arrow"></div>
+      </div>
+      <div class="input-wrap">
+        <input type="text" placeholder="搜索车牌号/广告名" v-model="searchText" @input="beforeSearch">
+      </div>
     </div>
     <scroll-view class="scroll-container" scroll-y enable-back-to-top @scroll="scroll">
       <div class="scroll-wrap">
@@ -9,7 +15,7 @@
           <li
             v-for="(advert, index) in searchResult"
             :key="index"
-            @click="jumpPage('advertItem', advert.carNumber)"
+            @click="jumpPage('advertItem', advert)"
           >
             <div class="advert-content">
               <div class="advert-name">
@@ -17,20 +23,36 @@
                 <span>{{ advert.workTime }}</span>
               </div>
               <p class="advert-time">
+                <span :class="{ red: advert.isRed }">{{ advert.desc }}</span>
                 <span>{{ advert.time }}</span>
-                <span>{{ advert.desc }}</span>
               </p>
             </div>
-            <div class="arrow"></div>
+            <div class="arrow" v-if="!advert.isFromOtherShop"></div>
           </li>
         </ul>
         <div class="empty" v-if="isSearching && !searchResult.length">未搜索到相关车辆/广告</div>
       </div>
     </scroll-view>
+    <base-modal
+      customClass="search-modal"
+      position="top"
+      v-if="isSearchTypeClick"
+      @showModal="searchKeyClick"
+    >
+      <div class="search-container">
+        <search-type-list-modal :typeList="typeList" @searchKeyType="searchKeyType"/>
+      </div>
+      <div class="arrow">
+        <span></span>
+      </div>
+    </base-modal>
   </div>
 </template>
 <script>
 import api from "@/utils/ajax";
+import baseModal from "@/components/baseModal";
+import searchTypeListModal from "./components/searchTypeList";
+
 // 节流函数
 const delay = (function() {
   let timer = 0;
@@ -41,15 +63,31 @@ const delay = (function() {
 })();
 export default {
   name: "search",
+  components: {
+    baseModal,
+    searchTypeListModal
+  },
   data() {
     return {
+      typeList: [
+        {
+          typeId: 1,
+          typeText: "车牌号"
+        },
+        {
+          typeId: 2,
+          typeText: "广告名"
+        }
+      ],
+      defaultType: {},
       searchText: "",
       searchResult: [],
       pageParams: {
         page: 1,
         limit: 10,
         total: 0
-      }
+      },
+      isSearchTypeClick: false
     };
   },
   computed: {
@@ -62,11 +100,28 @@ export default {
     },
     isSearching() {
       return !!this.searchText.replace(/^\s+|\s+$/g, "");
+    },
+    carWashId() {
+      const {
+        loginInfo: { carWashId }
+      } = this.$store.state;
+      return carWashId;
+    },
+    searchKey() {
+      return this.defaultType.typeId === 2 ? "brand" : "carNumber";
     }
   },
   methods: {
     beforeSearch() {
       delay(this.search, 500);
+    },
+    searchKeyClick() {
+      this.isSearchTypeClick = !this.isSearchTypeClick;
+    },
+    searchKeyType(type) {
+      this.defaultType = type;
+      this.isSearchTypeClick = false;
+      this.search();
     },
     async search() {
       this.pageParams.page = 1;
@@ -74,7 +129,8 @@ export default {
         searchText,
         pageParams: { limit },
         offset,
-        isSearching
+        isSearching,
+        searchKey
       } = this;
       if (!isSearching) {
         this.searchResult = [];
@@ -84,7 +140,7 @@ export default {
       const res = await api.getAdvertList({
         offset,
         limit,
-        search: searchText
+        [searchKey]: searchText
       });
       if (res && res.code === 200) {
         const { rows, total } = res.data;
@@ -101,6 +157,7 @@ export default {
       const {
         brand,
         carNumber,
+        carWashId,
         day,
         minTimeLen,
         exchangeMinLen,
@@ -109,17 +166,27 @@ export default {
         exchangePeriod,
         isGetBT
       } = row;
+
+      const isFromOtherShop = this.carWashId !== carWashId; //是否来自本店
+
       let formateRow = {
         carNumber,
-        name: `${carNumber}|${brand}`,
+        name: `${carNumber} | ${brand}`,
         time: "",
         workTime: "",
-        desc: ""
+        desc: "",
+        isRed: false,
+        isFromOtherShop
       };
       if (this.status === "FINISHED") {
         formateRow.workTime = `已空闲${freeDay}天`;
         if (!isGetBT) {
           formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+          formateRow.isRed = true;
+        }
+        if (isFromOtherShop) {
+          formateRow.desc = "该广告在其他店张贴，无权拍照或更换";
+          formateRow.isRed = true;
         }
       } else {
         let workTime = "";
@@ -131,8 +198,15 @@ export default {
           } else {
             desc = `差${minTimeLen - day}天可更换广告`;
           }
+          if (isFromOtherShop) {
+            desc = "来自其他店";
+          }
         } else {
-          workTime = `已贴${day}|距结束${minTimeLen}`;
+          workTime = `已贴${day} | 距结束${minTimeLen}`;
+          if (isFromOtherShop) {
+            formateRow.desc = "该广告在其他店张贴，无权拍照或更换";
+            formateRow.isRed = true;
+          }
         }
         formateRow.workTime = workTime;
         formateRow.desc = desc;
@@ -140,10 +214,22 @@ export default {
       }
       return formateRow;
     },
-    jumpPage(path, carNumber) {
+    jumpPage(path, advert) {
+      const { isFromOtherShop, carNumber } = advert;
+      if (isFromOtherShop) {
+        wx.showToast({
+          title: "只能查看本店广告详情",
+          icon: "none",
+          duration: 2000
+        });
+        return;
+      }
       const url = `../${path}/main?carNumber=${carNumber}`;
       wx.navigateTo({ url });
     }
+  },
+  onShow() {
+    this.defaultType = this.typeList[0];
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;
@@ -154,26 +240,46 @@ export default {
   }
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .search-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
   box-sizing: border-box;
-  .input-wrap {
-    width: 100%;
-    height: 47px;
-    padding: 0 30px;
-    margin-bottom: 10px;
+  .search-wrap {
+    width: calc(100% - 40px);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ebebeb;
+    border-radius: 10px;
     box-sizing: border-box;
-    input {
-      width: 100%;
-      height: 100%;
-      padding-left: 20px;
+    .search-type {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 15px;
       font-size: 14px;
-      background: #ebebeb;
-      border-radius: 10px;
+      .arrow {
+        width: 8px;
+        height: 22px;
+        margin-left: 10px;
+        background: url("./images/arrow.png") center/100% no-repeat;
+        transform: rotate(90deg);
+      }
+    }
+    .input-wrap {
+      flex: 1;
+      height: 47px;
       box-sizing: border-box;
+      input {
+        width: 100%;
+        height: 100%;
+        padding-left: 20px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
     }
   }
   .scroll-container {
@@ -198,12 +304,15 @@ export default {
               justify-content: space-between;
               font-size: 14px;
               line-height: 24px;
-            }
-            .advert-name {
-              color: #1b1b4e;
-            }
-            .advert-time {
               color: #aeb3c0;
+              span {
+                &:first-child {
+                  color: #1b1b4e;
+                }
+                &.red {
+                  color: #fd687d;
+                }
+              }
             }
           }
           .arrow {
@@ -220,6 +329,42 @@ export default {
         font-size: 14px;
         text-align: center;
         color: #aeb3c0;
+      }
+    }
+  }
+  .search-modal {
+    .modal-wrap {
+      height: 45% !important;
+      padding-bottom: 10px;
+      overflow: hidden;
+    }
+    .search-container {
+      position: relative;
+      height: 100%;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      ul {
+        li {
+          height: 60px;
+          line-height: 60px;
+          text-align: center;
+          font-size: 14px;
+          color: #1b1b4e;
+        }
+      }
+    }
+    .arrow {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      span {
+        display: inline-block;
+        width: 8px;
+        height: 18px;
+        background: url("./images/arrow.png") center/100% no-repeat;
+        transform: rotate(-90deg);
       }
     }
   }
