@@ -53,7 +53,6 @@ export default {
         return transaction.id === parseInt(id);
       }
     )[0];
-    console.log(this.selectedTransaction)
   },
   onShareAppMessage(res) {
     let { share } = this.$store.state;
