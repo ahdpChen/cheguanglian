@@ -6,8 +6,9 @@
         <div class="arrow"></div>
       </div>
       <div class="input-wrap">
-        <input type="text" placeholder="搜索车牌号/广告名" v-model="searchText" @input="beforeSearch">
+        <input type="text" placeholder="请输入完整车牌或广告名" v-model="searchText" @input="beforeSearch">
       </div>
+      <div class="clear-btn" @click.stop="clearInput" v-if="isSearching"></div>
     </div>
     <scroll-view class="scroll-container" scroll-y enable-back-to-top @scroll="scroll">
       <div class="scroll-wrap">
@@ -114,6 +115,13 @@ export default {
   },
   methods: {
     beforeSearch() {
+      // 车牌号完整性校验
+      if (this.defaultType.typeId === 1) {
+        const reg = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/;
+        if (this.searchText.toLocaleUpperCase().search(reg) === -1) {
+          return false;
+        }
+      }
       delay(this.search, 500);
     },
     searchKeyClick() {
@@ -126,7 +134,7 @@ export default {
     },
     async search() {
       this.pageParams.page = 1;
-      const {
+      let {
         searchText,
         pageParams: { limit },
         offset,
@@ -137,6 +145,10 @@ export default {
         this.searchResult = [];
         this.pageParams.total = 0;
         return;
+      }
+      // 车牌号字母转大写
+      if (this.defaultType.typeId === 1) {
+        searchText = searchText.toLocaleUpperCase();
       }
       const res = await api.getAdvertList({
         offset,
@@ -215,6 +227,10 @@ export default {
       }
       return formateRow;
     },
+    clearInput() {
+      this.searchText = "";
+      this.search();
+    },
     jumpPage(path, advert) {
       const { isFromOtherShop, carNumber } = advert;
       if (isFromOtherShop) {
@@ -250,6 +266,7 @@ export default {
   .search-wrap {
     width: calc(100% - 40px);
     margin: 0 auto 20px;
+    padding: 0 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -260,7 +277,6 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding-left: 15px;
       font-size: 14px;
       .arrow {
         width: 8px;
@@ -281,6 +297,11 @@ export default {
         font-size: 14px;
         box-sizing: border-box;
       }
+    }
+    .clear-btn {
+      width: 23px;
+      height: 23px;
+      background: url("./images/clear.png") center/100% no-repeat;
     }
   }
   .scroll-container {
