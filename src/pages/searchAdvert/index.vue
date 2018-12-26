@@ -10,28 +10,36 @@
       </div>
       <div class="clear-btn" @click.stop="clearInput" v-if="isSearching"></div>
     </div>
-    <scroll-view class="scroll-container" scroll-y enable-back-to-top @scroll="scroll">
+    <scroll-view
+      class="scroll-container"
+      scroll-y
+      enable-back-to-top
+      @scrolltolower="pullUploadMore"
+    >
       <div class="scroll-wrap">
-        <ul v-if="searchResult.length">
-          <li
-            v-for="(advert, index) in searchResult"
-            :key="index"
-            v-if="defaultType.typeId === 1 || (defaultType.typeId === 2 && !advert.isFromOtherShop)"
-            @click="jumpPage('advertItem', advert)"
-          >
-            <div class="advert-content">
-              <div class="advert-name">
-                <span>{{ advert.name }}</span>
-                <span>{{ advert.workTime }}</span>
+        <div v-if="searchResult.length">
+          <ul>
+            <li
+              v-for="(advert, index) in searchResult"
+              :key="index"
+              v-if="defaultType.typeId === 1 || (defaultType.typeId === 2 && !advert.isFromOtherShop)"
+              @click="jumpPage('advertItem', advert)"
+            >
+              <div class="advert-content">
+                <div class="advert-name">
+                  <span>{{ advert.name }}</span>
+                  <span>{{ advert.workTime }}</span>
+                </div>
+                <p class="advert-time">
+                  <span :class="{ red: advert.isRed }">{{ advert.desc }}</span>
+                  <span>{{ advert.time }}</span>
+                </p>
               </div>
-              <p class="advert-time">
-                <span :class="{ red: advert.isRed }">{{ advert.desc }}</span>
-                <span>{{ advert.time }}</span>
-              </p>
-            </div>
-            <div class="arrow" v-if="!advert.isFromOtherShop"></div>
-          </li>
-        </ul>
+              <div class="arrow" v-if="!advert.isFromOtherShop"></div>
+            </li>
+          </ul>
+          <div class="loadMore">{{loadMore? '加载更多': '没有更多了'}}</div>
+        </div>
         <div class="empty" v-if="isSearching && !searchResult.length">未搜索到相关车辆/广告</div>
       </div>
     </scroll-view>
@@ -122,6 +130,7 @@ export default {
           return false;
         }
       }
+      this.pageParams.page = 1;
       delay(this.search, 500);
     },
     searchKeyClick() {
@@ -130,13 +139,13 @@ export default {
     searchKeyType(type) {
       this.defaultType = type;
       this.isSearchTypeClick = false;
+      this.pageParams.page = 1;
       this.search();
     },
     async search() {
-      this.pageParams.page = 1;
       let {
         searchText,
-        pageParams: { limit },
+        pageParams: { limit, page },
         offset,
         isSearching,
         searchKey
@@ -157,9 +166,12 @@ export default {
       });
       if (res && res.code === 200) {
         const { rows, total } = res.data;
-        this.searchResult = rows.map(row => {
-          return this.formateRows(row);
-        });
+        const currData = page === 1 ? [] : this.searchResult;
+        this.searchResult = currData.concat(
+          rows.map(row => {
+            return this.formateRows(row);
+          })
+        );
         this.pageParams.total = total;
       } else {
         this.searchResult = [];
@@ -177,7 +189,8 @@ export default {
         firstPostdTime,
         freeDay,
         exchangePeriod,
-        isGetBT
+        isGetBT,
+        status
       } = row;
 
       const isFromOtherShop = this.carWashId !== carWashId; //是否来自本店
@@ -191,7 +204,7 @@ export default {
         isRed: false,
         isFromOtherShop
       };
-      if (this.status === "FINISHED") {
+      if (status === "已结束") {
         formateRow.workTime = `已空闲${freeDay}天`;
         if (!isGetBT) {
           formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
@@ -226,6 +239,13 @@ export default {
         formateRow.time = firstPostdTime;
       }
       return formateRow;
+    },
+    pullUploadMore() {
+      if (!this.loadMore) {
+        return;
+      }
+      this.pageParams.page++;
+      this.search();
     },
     clearInput() {
       this.searchText = "";
@@ -344,6 +364,13 @@ export default {
             background: url("./images/arrow.png") center/100% no-repeat;
           }
         }
+      }
+      .loadMore {
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        font-size: 16px;
+        color: #1b1b4e;
       }
       .empty {
         height: 60px;

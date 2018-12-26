@@ -349,18 +349,21 @@ export default {
           });
           const res = await api.addConstruction(params);
           if (res && res.code === 200) {
-            this.handleSubmit(
-              "系统将在1个工作日内审核，审核通过后将收到补贴。",
-              this.clearData
-            );
+            // type：施工单类型（首次type=FIRST, 返店type=SECOND）
+            const { type } = res.data;
+            let content =
+              type === "SECOND"
+                ? "系统将在1个工作日内审核，审核通过后将收到补贴。"
+                : "系统将在1个工作日内审核，审核通过后将收到补贴。";
+            this.handleSubmit(content, this.clearData);
           } else if (res && res.message) {
             this.handleSubmit(res.message, this.clearData);
           }
         } else {
           const res = await api.validConstr(params);
+          this.isLoading = false;
           // console.log(res);
         }
-        this.isLoading = false;
       } catch (err) {
         console.log(err);
         this.isLoading = false;
@@ -372,9 +375,10 @@ export default {
         return !item.used;
       })[0];
       this.chooseImages = [];
-      this.preLicense = '沪';
+      this.preLicense = "沪";
       this.license = "";
       this.scanLicense = "";
+      this.isLoading = false;
     },
     // 获取广告下拉列表
     async getSelAd() {
@@ -413,9 +417,10 @@ export default {
           }
           d.endTime = d.endTime.split(" ")[0];
         });
-        this.defaultAdvert = res.data.filter(item => {
-          return !item.used;
-        })[0] || {};
+        this.defaultAdvert =
+          res.data.filter(item => {
+            return !item.used;
+          })[0] || {};
         this.selectOptions = [].concat(res.data || []);
       }
     }
