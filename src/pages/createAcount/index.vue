@@ -102,11 +102,11 @@ export default {
         //   params.id = this.originData.id;
         // }
         const res = await api.editEmployee(params);
-        this.isLoading = false;
         if (res && res.code === 200) {
           const title = this.originData.id ? "用户修改成功" : "用户新增成功";
           this.showToast(title, "success", true);
         }
+        this.isLoading = false;
       } else {
         this.showToast("请输入正确的手机号", "none", false);
       }

@@ -142,7 +142,8 @@ export default {
         firstPostdTime,
         freeDay,
         exchangePeriod,
-        isGetBT
+        isGetBT,
+        status
       } = row;
       let formateRow = {
         carNumber,
@@ -152,7 +153,7 @@ export default {
         desc: "",
         isRed: false
       };
-      if (this.status === "FINISHED") {
+      if (status === "已结束") {
         formateRow.workTime = `已空闲${freeDay}天`;
         if (!isGetBT) {
           formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
@@ -186,7 +187,7 @@ export default {
         return;
       }
       this.pageParams.page++;
-      this.getAccountDetail();
+      this.getAdvertList();
     },
     changeTab(index) {
       if (this.tabIndex === index) {
