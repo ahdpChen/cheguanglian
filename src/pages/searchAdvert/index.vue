@@ -190,7 +190,7 @@ export default {
         freeDay,
         exchangePeriod,
         isGetBT,
-        status
+        status //UNAUDITED("UNAUDITED", "未审核"),UNPASS("UNPASS","审核未通过"), PASS("PASS", "审核通过"),FINISHED("FINISHED","已完成");
       } = row;
 
       const isFromOtherShop = this.carWashId !== carWashId; //是否来自本店
@@ -204,7 +204,7 @@ export default {
         isRed: false,
         isFromOtherShop
       };
-      if (status === "已结束") {
+      if (status === "FINISHED") {
         formateRow.workTime = `已空闲${freeDay}天`;
         if (!isGetBT) {
           formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
@@ -228,7 +228,7 @@ export default {
             desc = "来自其他店";
           }
         } else {
-          workTime = `已贴${day} | 距结束${minTimeLen}`;
+          workTime = `已贴${day}天 | 距结束${minTimeLen}天`;
           if (isFromOtherShop) {
             formateRow.desc = "该广告在其他店张贴，无权拍照或更换";
             formateRow.isRed = true;
