@@ -170,7 +170,6 @@ export default {
         name: "file",
         header: {
           "Content-type": "multipart/form-data;charset=utf-8",
-          // "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
           Host: config.uploadFileHost,
           Authorization: `Bearer ${loginInfo.token}`
         },

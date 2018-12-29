@@ -178,6 +178,19 @@ export default {
         this.pageParams.total = 0;
       }
     },
+    fmtDate(time) {
+      var date = new Date(time);
+      var y = 1900 + date.getYear();
+      var m = "0" + (date.getMonth() + 1);
+      var d = "0" + date.getDate();
+      return (
+        y +
+        "-" +
+        m.substring(m.length - 2, m.length) +
+        "-" +
+        d.substring(d.length - 2, d.length)
+      );
+    },
     formateRows(row) {
       const {
         brand,
@@ -205,9 +218,14 @@ export default {
         isFromOtherShop
       };
       if (status === "FINISHED") {
-        formateRow.workTime = `已空闲${freeDay}天`;
+        formateRow.name = `${carNumber}`;
+        formateRow.workTime = parseFloat(freeDay)
+          ? `已空闲${freeDay}天`
+          : "开始空闲";
         if (!isGetBT) {
-          formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+          formateRow.desc = `请于${this.fmtDate(
+            new Date(exchangePeriod.replace(/-/g, "/")).getTime()
+          )}(含)前领取补贴，逾期作废`;
           formateRow.isRed = true;
         }
         if (isFromOtherShop) {
