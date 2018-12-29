@@ -84,7 +84,7 @@ const getMsCode = phoneNumber => {
  * @param {*} userphone 手机号用户输入
  * @param {*} smCode 后台根据手机号获取
  */
-export const login = (userphone, smCode, code) => {
+const login = (userphone, smCode, code) => {
   return fly.post('/testApi/auth', qs.stringify({ account: userphone, code, smCode }), {
     extra: {
       auth: false
@@ -93,12 +93,12 @@ export const login = (userphone, smCode, code) => {
 }
 
 // 首页-获取广告下拉列表
-export const getSelAd = () => {
+const getSelAd = () => {
   return fly.get('/testApi/ad/getSelAd')
 }
 
 // 首页-选择车牌和广告后校验是否有效
-export const validConstr = (detail) => {
+const validConstr = (detail) => {
   return fly.get('/testApi/ad/validConstr', `detail=${JSON.stringify(detail)}`)
 }
 
@@ -116,22 +116,22 @@ export const validConstr = (detail) => {
  *  picList
  * }
  */
-export const addConstruction = (params) => {
+const addConstruction = (params) => {
   return fly.post('/testApi/ad/addConstruction', `detail=${JSON.stringify(params.detail)}&picList=${JSON.stringify(params.picList)}`)
 }
 
 // 我的-获取一级权限用户的基本信息
-export const getUserBaseInfo = () => {
+const getUserBaseInfo = () => {
   return fly.get('/testApi/user/userBaseInfo')
 }
 
 // 账户设置-获取一级权限用户下所属的员工列表
-export const getEmployees = () => {
+const getEmployees = () => {
   return fly.get('/testApi/user/getEmployees')
 }
 
 // 员工账户-删除员工
-export const deleteEmployee = (id) => {
+const deleteEmployee = (id) => {
   return fly.post('/testApi/user/delete', qs.stringify({ id }))
 }
 
@@ -144,7 +144,7 @@ export const deleteEmployee = (id) => {
  *  phone
  * }
  */
-export const editEmployee = (params) => {
+const editEmployee = (params) => {
   return fly.post('/testApi/user/addOrUpdte', qs.stringify(params))
 }
 
@@ -154,22 +154,22 @@ export const editEmployee = (params) => {
  * @param {*} offset (当前页起始值)
  * @param {*} limit (一页条数)
  */
-export const accountDetail = (type, offset, limit) => {
+const accountDetail = (type, offset, limit) => {
   return fly.get('/testApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
 }
 
 // 提现-提现申请页面 返回银行卡信息和可用额度
-export const getAmountAndBankCarInfo = () => {
+const getAmountAndBankCarInfo = () => {
   return fly.get('/testApi/user/withdrawaApply_page')
 }
 
 // 提现-添加或修改银行卡信息
-export const addBankInfo = (bankName, bankNo) => {
+const addBankInfo = (bankName, bankNo) => {
   return fly.post('/testApi/user/addBankInfo', `bankName=${bankName}&bankNo=${bankNo}`)
 }
 
 // 提现-发起提现请求
-export const doDepositSubmit = (amount) => {
+const doDepositSubmit = (amount) => {
   return fly.post('/testApi/user/withdrawaApply', qs.stringify({ amount }))
 }
 
@@ -182,18 +182,18 @@ export const doDepositSubmit = (amount) => {
  * brand  (广告名)
  * carNumber (车牌号)
  */
-export const getAdvertList = (params) => {
+const getAdvertList = (params) => {
   return fly.get('/testApi/user/selectPageConstrsOrder', qs.stringify(params))
 }
 
 // 广告情况-洗车店已施工的广告
-export const getAdListByCarNumber = (carNumber) => {
+const getAdListByCarNumber = (carNumber) => {
   return fly.get('/testApi/user/selectAdListByCarNumber', qs.stringify({carNumber}))
 }
 
 // 广告情况-广告施工详情
 
-export const getAdDetail = (id) => {
+const getAdDetail = (id) => {
   return fly.get('/testApi/ad/getConstrAdDetail', qs.stringify({id}))
 }
 
