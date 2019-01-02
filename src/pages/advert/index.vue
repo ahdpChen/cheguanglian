@@ -335,7 +335,7 @@ export default {
             span {
               &:first-child {
                 display: inline-block;
-                width: 155px;
+                width: 150px;
               }
             }
           }
