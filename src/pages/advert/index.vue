@@ -172,9 +172,11 @@ export default {
           ? `已空闲${freeDay}天`
           : "开始空闲";
         if (!isGetBT) {
-          formateRow.desc = `请于${this.fmtDate(
-            new Date(exchangePeriod.replace(/-/g, "/")).getTime()
-          )}(含)前领取补贴，逾期作废`;
+          const time = new Date(exchangePeriod.replace(/-/g, "/")).getTime();
+          console.log(time, time + 24 * 3600 * 1000);
+          if (time + 24 * 3600 * 1000 >= new Date().getTime()) {
+            formateRow.desc = `请于${this.fmtDate(time)}(含)前领取补贴，逾期作废`;
+          }
           formateRow.isRed = true;
         }
       } else {
@@ -309,9 +311,7 @@ export default {
       li {
         display: flex;
         align-items: center;
-        justify-content: center;
-        height: 60px;
-        margin-bottom: 10px;
+        padding: 12px 0;
         .advert-content {
           flex: 1;
           .advert-name,
