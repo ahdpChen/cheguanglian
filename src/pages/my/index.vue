@@ -6,7 +6,7 @@
         <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
       </div>
       <div class="total">
-        <span>总收入（{{ userBaseInfo.day || '1日' }}）</span>
+        <span>总收入（{{ userBaseInfo.formateTotalDay }}）</span>
         <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
       </div>
     </div>
@@ -64,13 +64,11 @@ export default {
       if (this.isTopLevel) {
         const res = await api.getUserBaseInfo();
         if (res && res.code === 200) {
+          let { day, totailAmount, totalBalance } = res.data;
+          day = 0;
           this.userBaseInfo = Object.assign(res.data, {
-            formateTotalAmount: utils.formatNumberWithComma(
-              res.data.totailAmount
-            ),
-            formateTotalBalance: utils.formatNumberWithComma(
-              res.data.totalBalance
-            )
+            formateTotalAmount: utils.formatNumberWithComma(totailAmount),
+            formateTotalBalance: utils.formatNumberWithComma(totalBalance)
           });
           this.setUserInfo(this.userBaseInfo);
         } else if (res && res.message) {
