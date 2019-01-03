@@ -22,7 +22,6 @@
             <li
               v-for="(advert, index) in searchResult"
               :key="index"
-              v-if="defaultType.typeId === 1 || (defaultType.typeId === 2 && !advert.isFromOtherShop)"
               @click="jumpPage('advertItem', advert)"
             >
               <div class="advert-content">
@@ -139,8 +138,7 @@ export default {
     searchKeyType(type) {
       this.defaultType = type;
       this.isSearchTypeClick = false;
-      this.pageParams.page = 1;
-      this.search();
+      this.beforeSearch();
     },
     async search() {
       let {
@@ -167,11 +165,18 @@ export default {
       if (res && res.code === 200) {
         const { rows, total } = res.data;
         const currData = page === 1 ? [] : this.searchResult;
-        this.searchResult = currData.concat(
+        let searchResult = currData.concat(
           rows.map(row => {
             return this.formateRows(row);
           })
         );
+        // 广告名搜索结果过滤其他店广告
+        if(this.defaultType.typeId === 2) {
+            searchResult = searchResult.filter((item)=> {
+              return !item.isFromOtherShop
+            })
+        }
+        this.searchResult = searchResult;
         this.pageParams.total = total;
       } else {
         this.searchResult = [];
