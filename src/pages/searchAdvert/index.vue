@@ -22,7 +22,6 @@
             <li
               v-for="(advert, index) in searchResult"
               :key="index"
-              v-if="defaultType.typeId === 1 || (defaultType.typeId === 2 && !advert.isFromOtherShop)"
               @click="jumpPage('advertItem', advert)"
             >
               <div class="advert-content">
@@ -139,8 +138,7 @@ export default {
     searchKeyType(type) {
       this.defaultType = type;
       this.isSearchTypeClick = false;
-      this.pageParams.page = 1;
-      this.search();
+      this.beforeSearch();
     },
     async search() {
       let {
@@ -167,16 +165,36 @@ export default {
       if (res && res.code === 200) {
         const { rows, total } = res.data;
         const currData = page === 1 ? [] : this.searchResult;
-        this.searchResult = currData.concat(
+        let searchResult = currData.concat(
           rows.map(row => {
             return this.formateRows(row);
           })
         );
+        // 广告名搜索结果过滤其他店广告
+        if(this.defaultType.typeId === 2) {
+            searchResult = searchResult.filter((item)=> {
+              return !item.isFromOtherShop
+            })
+        }
+        this.searchResult = searchResult;
         this.pageParams.total = total;
       } else {
         this.searchResult = [];
         this.pageParams.total = 0;
       }
+    },
+    fmtDate(time) {
+      var date = new Date(time);
+      var y = 1900 + date.getYear();
+      var m = "0" + (date.getMonth() + 1);
+      var d = "0" + date.getDate();
+      return (
+        y +
+        "-" +
+        m.substring(m.length - 2, m.length) +
+        "-" +
+        d.substring(d.length - 2, d.length)
+      );
     },
     formateRows(row) {
       const {
@@ -205,9 +223,14 @@ export default {
         isFromOtherShop
       };
       if (status === "FINISHED") {
-        formateRow.workTime = `已空闲${freeDay}天`;
+        formateRow.name = `${carNumber}`;
+        formateRow.workTime = parseFloat(freeDay)
+          ? `已空闲${freeDay}天`
+          : "开始空闲";
         if (!isGetBT) {
-          formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+          formateRow.desc = `请于${this.fmtDate(
+            new Date(exchangePeriod.replace(/-/g, "/")).getTime()
+          )}(含)前领取补贴，逾期作废`;
           formateRow.isRed = true;
         }
         if (isFromOtherShop) {

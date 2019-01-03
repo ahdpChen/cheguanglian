@@ -132,6 +132,19 @@ export default {
         this.advertTabs[tabIndex].count = total;
       }
     },
+    fmtDate(time) {
+      var date = new Date(time);
+      var y = 1900 + date.getYear();
+      var m = "0" + (date.getMonth() + 1);
+      var d = "0" + date.getDate();
+      return (
+        y +
+        "-" +
+        m.substring(m.length - 2, m.length) +
+        "-" +
+        d.substring(d.length - 2, d.length)
+      );
+    },
     formateRows(row) {
       const {
         brand,
@@ -154,9 +167,14 @@ export default {
         isRed: false
       };
       if (status === "FINISHED") {
-        formateRow.workTime = `已空闲${freeDay}天`;
+        formateRow.name = `${carNumber}`;
+        formateRow.workTime = parseFloat(freeDay)
+          ? `已空闲${freeDay}天`
+          : "开始空闲";
         if (!isGetBT) {
-          formateRow.desc = `请于${exchangePeriod}前领取补贴，逾期作废`;
+          formateRow.desc = `请于${this.fmtDate(
+            new Date(exchangePeriod.replace(/-/g, "/")).getTime()
+          )}(含)前领取补贴，逾期作废`;
           formateRow.isRed = true;
         }
       } else {
@@ -301,7 +319,7 @@ export default {
             display: flex;
             justify-content: space-between;
             font-size: 14px;
-            line-height: 24px;
+            // line-height: 24px;
             color: #aeb3c0;
             span {
               &:first-child {
@@ -309,6 +327,15 @@ export default {
               }
               &.red {
                 color: #fd687d;
+              }
+            }
+          }
+          .advert-name {
+            margin-bottom: 5px;
+            span {
+              &:first-child {
+                display: inline-block;
+                width: 150px;
               }
             }
           }
