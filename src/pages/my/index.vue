@@ -6,7 +6,7 @@
         <span class="money">￥{{ userBaseInfo.formateTotalBalance }}</span>
       </div>
       <div class="total">
-        <span>总收入（{{ userBaseInfo.formateTotalDay }}）</span>
+        <span>总收入（{{ userBaseInfo.day }}）</span>
         <span class="money">￥{{ userBaseInfo.formateTotalAmount }}</span>
       </div>
     </div>
@@ -65,7 +65,7 @@ export default {
         const res = await api.getUserBaseInfo();
         if (res && res.code === 200) {
           let { day, totailAmount, totalBalance } = res.data;
-          day = 0;
+          day = day || "1天";
           this.userBaseInfo = Object.assign(res.data, {
             formateTotalAmount: utils.formatNumberWithComma(totailAmount),
             formateTotalBalance: utils.formatNumberWithComma(totalBalance)
