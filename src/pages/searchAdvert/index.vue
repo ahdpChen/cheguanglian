@@ -171,10 +171,10 @@ export default {
           })
         );
         // 广告名搜索结果过滤其他店广告
-        if(this.defaultType.typeId === 2) {
-            searchResult = searchResult.filter((item)=> {
-              return !item.isFromOtherShop
-            })
+        if (this.defaultType.typeId === 2) {
+          searchResult = searchResult.filter(item => {
+            return !item.isFromOtherShop;
+          });
         }
         this.searchResult = searchResult;
         this.pageParams.total = total;
@@ -228,9 +228,13 @@ export default {
           ? `已空闲${freeDay}天`
           : "开始空闲";
         if (!isGetBT) {
-          formateRow.desc = `请于${this.fmtDate(
-            new Date(exchangePeriod.replace(/-/g, "/")).getTime()
-          )}(含)前领取补贴，逾期作废`;
+          const time = new Date(exchangePeriod.replace(/-/g, "/")).getTime();
+          console.log(time, time + 24 * 3600 * 1000);
+          if (time + 24 * 3600 * 1000 >= new Date().getTime()) {
+            formateRow.desc = `请于${this.fmtDate(
+              time
+            )}(含)前领取补贴，逾期作废`;
+          }
           formateRow.isRed = true;
         }
         if (isFromOtherShop) {
@@ -358,9 +362,7 @@ export default {
         li {
           display: flex;
           align-items: center;
-          justify-content: center;
-          height: 60px;
-          margin-bottom: 10px;
+          padding: 12px 0;
           .advert-content {
             flex: 1;
             .advert-name,
