@@ -24,7 +24,7 @@
             </div>
             <div>
               {{ item.firstTime }}
-              <div class="arrow"></div>
+              <div v-if="item.type === 'FIRST'" class="arrow"></div>
             </div>
           </div>
           <div class="flex" v-if="item.type !== 'FIRST'">

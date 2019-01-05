@@ -4,6 +4,7 @@
       class="scroll-container"
       scroll-y
       enable-back-to-top
+      :scroll-top="scrollTop"
       @scroll="scroll"
       @scrolltolower="pullUploadMore"
     >
@@ -76,13 +77,15 @@ export default {
         }
       ],
       tabIndex: 0,
+      scrollTop: 0,
       advertList: [],
       pageParams: {
         page: 1,
         limit: 10,
         total: 0
       },
-      isScroll: false
+      isScroll: false,
+      isLoading: false
     };
   },
   computed: {
@@ -150,13 +153,13 @@ export default {
         brand, // 广告品牌
         carNumber, // 车牌号
         day, // 广告张贴天数
-        minTimeLen, // 
+        minTimeLen, //
         exchangeMinLen, // 最小兑换时长
         firstPostdTime, // 首次张贴时间
         endDay, //结束时长
-        freeDay,  // 空闲时长
+        freeDay, // 空闲时长
         exchangePeriod, //兑换截至时间
-        isGetBT,  // 是否领取补贴
+        isGetBT, // 是否领取补贴
         status // 施工单状态：UNAUDITED("UNAUDITED", "未审核"),UNPASS("UNPASS","审核未通过"), PASS("PASS", "审核通过"),FINISHED("FINISHED","已完成");
       } = row;
       let formateRow = {
@@ -175,7 +178,9 @@ export default {
         if (!isGetBT) {
           const time = new Date(exchangePeriod.replace(/-/g, "/")).getTime();
           if (time + 24 * 3600 * 1000 >= new Date().getTime()) {
-            formateRow.desc = `请于${this.fmtDate(time)}(含)前领取补贴，逾期作废`;
+            formateRow.desc = `请于${this.fmtDate(
+              time
+            )}(含)前领取补贴，逾期作废`;
           }
           formateRow.isRed = true;
         }
@@ -202,12 +207,14 @@ export default {
       const { scrollTop } = e.mp.detail;
       this.isScroll = scrollTop > 60;
     },
-    pullUploadMore() {
-      if (!this.loadMore) {
+    async pullUploadMore() {
+      if (!this.loadMore || this.isLoading) {
         return;
       }
       this.pageParams.page++;
-      this.getAdvertList();
+      this.isLoading = true;
+      await this.getAdvertList();
+      this.isLoading = false;
     },
     changeTab(index) {
       if (this.tabIndex === index) {
@@ -215,6 +222,7 @@ export default {
       }
       this.tabIndex = index;
       this.pageParams.page = 1;
+      this.scrollTop = 0;
       this.getAdvertList();
     },
     jumpPage(path, carNumber) {
@@ -224,6 +232,7 @@ export default {
   },
   onShow() {
     this.pageParams.page = 1;
+    this.scrollTop = 0;
     this.getAdvertList();
   },
   onShareAppMessage(res) {

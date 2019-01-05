@@ -14,6 +14,7 @@
       class="scroll-container"
       scroll-y
       enable-back-to-top
+      :scroll-top="scrollTop"
       @scrolltolower="pullUploadMore"
     >
       <div class="scroll-wrap">
@@ -68,12 +69,14 @@ export default {
         }
       ],
       tabIndex: 0,
+      scrollTop: 0,
       transactionsData: [],
       pageParams: {
         page: 1,
         limit: 10,
         total: 0
-      }
+      },
+      isLoading: false
     };
   },
   computed: {
@@ -111,14 +114,17 @@ export default {
       }
       this.tabIndex = index;
       this.pageParams.page = 1;
+      this.scrollTop = 0;
       this.getAccountDetail();
     },
-    pullUploadMore() {
-      if (!this.loadMore) {
+    async pullUploadMore() {
+      if (!this.loadMore || this.isLoading) {
         return;
       }
       this.pageParams.page++;
-      this.getAccountDetail();
+      this.isLoading = true;
+      await this.getAccountDetail();
+      this.isLoading = false;
     },
     navigationToPage(path, id) {
       let url = `../${path}/main`;
@@ -133,6 +139,7 @@ export default {
       title: "明细"
     });
     this.pageParams.page = 1;
+    this.scrollTop = 0;
     this.getAccountDetail();
   },
   onShareAppMessage(res) {

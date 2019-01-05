@@ -14,6 +14,7 @@
       class="scroll-container"
       scroll-y
       enable-back-to-top
+      :scroll-top="scrollTop"
       @scrolltolower="pullUploadMore"
     >
       <div class="scroll-wrap">
@@ -91,12 +92,14 @@ export default {
       defaultType: {},
       searchText: "",
       searchResult: [],
+      scrollTop: 0,
       pageParams: {
         page: 1,
         limit: 10,
         total: 0
       },
-      isSearchTypeClick: false
+      isSearchTypeClick: false,
+      isLoading: false
     };
   },
   computed: {
@@ -238,12 +241,14 @@ export default {
           formateRow.isRed = true;
         }
         if (isFromOtherShop) {
-          formateRow.desc = "该广告在其他店张贴，无权拍照或更换";
-          formateRow.isRed = true;
+          formateRow.desc = "来自其他店";
+          formateRow.isRed = false;
         }
       } else {
         let workTime = "";
         let desc = "";
+        let time = firstPostdTime;
+        let isRed = false;
         if (day < minTimeLen) {
           workTime = `已贴${day}天 | 最少${minTimeLen}天`;
           if (day < exchangeMinLen) {
@@ -251,28 +256,29 @@ export default {
           } else {
             desc = `差${minTimeLen - day}天可更换广告`;
           }
-          if (isFromOtherShop) {
-            desc = "来自其他店";
-          }
         } else {
           workTime = `已贴${day}天 | 距结束${endDay}天`;
-          if (isFromOtherShop) {
-            formateRow.desc = "该广告在其他店张贴，无权拍照或更换";
-            formateRow.isRed = true;
-          }
+        }
+        if (isFromOtherShop) {
+          desc = "该广告在其他店张贴，无权拍照或更换";
+          time = '';
+          isRed = true;
         }
         formateRow.workTime = workTime;
         formateRow.desc = desc;
-        formateRow.time = firstPostdTime;
+        formateRow.time = time;
+        formateRow.isRed = isRed;
       }
       return formateRow;
     },
-    pullUploadMore() {
-      if (!this.loadMore) {
+    async pullUploadMore() {
+      if (!this.loadMore || this.isLoading) {
         return;
       }
       this.pageParams.page++;
-      this.search();
+      this.isLoading = true;
+      await this.search();
+      this.isLoading = false;
     },
     clearInput() {
       this.searchText = "";
