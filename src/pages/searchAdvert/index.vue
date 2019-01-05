@@ -198,6 +198,7 @@ export default {
     },
     formateRows(row) {
       const {
+        carWashId, // 洗车店id
         brand, // 广告品牌
         carNumber, // 车牌号
         day, // 广告张贴天数
