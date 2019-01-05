@@ -67,6 +67,7 @@ export default {
           let { day, totailAmount, totalBalance } = res.data;
           day = day || "1天";
           this.userBaseInfo = Object.assign(res.data, {
+            day,
             formateTotalAmount: utils.formatNumberWithComma(totailAmount),
             formateTotalBalance: utils.formatNumberWithComma(totalBalance)
           });
