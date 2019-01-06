@@ -22,6 +22,7 @@
           <ul>
             <li
               v-for="(advert, index) in searchResult"
+              v-if="advert.isShow"
               :key="index"
               @click="jumpPage('advertItem', advert)"
             >
@@ -129,6 +130,8 @@ export default {
       if (this.defaultType.typeId === 1) {
         const reg = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/;
         if (this.searchText.toLocaleUpperCase().search(reg) === -1) {
+          this.searchResult = [];
+          this.pageParams.total = 0;
           return false;
         }
       }
@@ -174,11 +177,13 @@ export default {
           })
         );
         // 广告名搜索结果过滤其他店广告
-        if (this.defaultType.typeId === 2) {
-          searchResult = searchResult.filter(item => {
-            return !item.isFromOtherShop;
-          });
-        }
+        let isSearchByAdverName = this.defaultType.typeId === 2;
+        searchResult.forEach(item => {
+          item.isShow = true;
+          if (isSearchByAdverName && item.isFromOtherShop) {
+            item.isShow = false;
+          }
+        });
         this.searchResult = searchResult;
         this.pageParams.total = total;
       } else {
@@ -205,13 +210,13 @@ export default {
         brand, // 广告品牌
         carNumber, // 车牌号
         day, // 广告张贴天数
-        minTimeLen, // 
+        minTimeLen, //
         exchangeMinLen, // 最小兑换时长
         firstPostdTime, // 首次张贴时间
         endDay, //结束时长
-        freeDay,  // 空闲时长
+        freeDay, // 空闲时长
         exchangePeriod, //兑换截至时间
-        isGetBT,  // 是否领取补贴
+        isGetBT, // 是否领取补贴
         status // 施工单状态：UNAUDITED("UNAUDITED", "未审核"),UNPASS("UNPASS","审核未通过"), PASS("PASS", "审核通过"),FINISHED("FINISHED","已完成");
       } = row;
 
@@ -226,10 +231,10 @@ export default {
         isRed: false,
         isFromOtherShop
       };
-      if (status === "FINISHED") {
+      if (endDay <= 0) {
         formateRow.name = `${carNumber}`;
         formateRow.workTime = parseFloat(freeDay)
-          ? `已空闲${freeDay}天`
+          ? `已空闲满${freeDay}天`
           : "开始空闲";
         if (!isGetBT) {
           const time = new Date(exchangePeriod.replace(/-/g, "/")).getTime();
@@ -250,18 +255,18 @@ export default {
         let time = firstPostdTime;
         let isRed = false;
         if (day < minTimeLen) {
-          workTime = `已贴${day}天 | 最少${minTimeLen}天`;
+          workTime = `已贴满${day}天 | 最少${minTimeLen}天`;
           if (day < exchangeMinLen) {
             desc = `差${exchangeMinLen - day}天可领取补贴`;
           } else {
             desc = `差${minTimeLen - day}天可更换广告`;
           }
         } else {
-          workTime = `已贴${day}天 | 距结束${endDay}天`;
+          workTime = `已贴满${day}天 | 距结束${endDay}天`;
         }
         if (isFromOtherShop) {
           desc = "该广告在其他店张贴，无权拍照或更换";
-          time = '';
+          time = "";
           isRed = true;
         }
         formateRow.workTime = workTime;
@@ -376,7 +381,7 @@ export default {
               display: flex;
               justify-content: space-between;
               font-size: 14px;
-              line-height: 24px;
+              // line-height: 24px;
               color: #aeb3c0;
               span {
                 &:first-child {
@@ -384,6 +389,15 @@ export default {
                 }
                 &.red {
                   color: #fd687d;
+                }
+              }
+            }
+            .advert-name {
+              margin-bottom: 5px;
+              span {
+                &:first-child {
+                  display: inline-block;
+                  width: 140px;
                 }
               }
             }

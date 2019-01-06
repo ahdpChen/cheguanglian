@@ -170,10 +170,10 @@ export default {
         desc: "",
         isRed: false
       };
-      if (status === "FINISHED") {
+      if (endDay <= 0) {
         formateRow.name = `${carNumber}`;
         formateRow.workTime = parseFloat(freeDay)
-          ? `已空闲${freeDay}天`
+          ? `已空闲满${freeDay}天`
           : "开始空闲";
         if (!isGetBT) {
           const time = new Date(exchangePeriod.replace(/-/g, "/")).getTime();
@@ -188,14 +188,14 @@ export default {
         let workTime = "";
         let desc = "";
         if (day < minTimeLen) {
-          workTime = `已贴${day}天 | 最少${minTimeLen}天`;
+          workTime = `已贴满${day}天 | 最少${minTimeLen}天`;
           if (day < exchangeMinLen) {
             desc = `差${exchangeMinLen - day}天可领取补贴`;
           } else {
             desc = `差${minTimeLen - day}天可更换广告`;
           }
         } else {
-          workTime = `已贴${day}天 | 距结束${endDay}天`;
+          workTime = `已贴满${day}天 | 距结束${endDay}天`;
         }
         formateRow.workTime = workTime;
         formateRow.desc = desc;
@@ -344,7 +344,7 @@ export default {
             span {
               &:first-child {
                 display: inline-block;
-                width: 150px;
+                width: 140px;
               }
             }
           }
