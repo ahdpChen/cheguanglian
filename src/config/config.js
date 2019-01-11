@@ -1,15 +1,19 @@
-let host = 'http://www.cheguanglian.com:8080'
-let uploadFileHost = 'www.cheguanglian.com:8080'
-console.log(process.env.NODE_ENV)
-if (process.env.NODE_ENV === 'production') {
-  host = 'http://www.cheguanglian.com'
-  uploadFileHost = 'www.cheguanglian.com'
+const env = process.env.NODE_ENV || 'development'
+console.log(env)
+const requestConfigs = {
+  development: {
+    host: 'http://www.cheguanglian.com:8080',
+    uploadFileHost: 'api.cheguanglian.com:8080'
+  },
+  production: {
+    host: 'http://api.cheguanglian.com',
+    uploadFileHost: 'api.cheguanglian.com'
+  }
 }
-const appid = 'wx641d418964519abb'
+const appid = 'wxa49d31e926e524c7'
 const appKey = ''
 const config = {
-  host,
-  uploadFileHost,
+  ...requestConfigs[env],
   appid,
   appKey
 }
