@@ -97,25 +97,28 @@ export default {
         return;
       }
       this.isVerifyCodeClick = true;
-      const res = await api.getMsCode(this.phone);
-      if (res && res.code === 200) {
-        this.showToast();
-        this.setTimeCut();
-        this.verifyCodeTimer = setInterval(() => {
+      try {
+        const res = await api.getMsCode(this.phone);
+        if (res && res.code === 200) {
+          this.showToast();
           this.setTimeCut();
-        }, 1000);
-      } else if (res && res.message) {
-        if (res.message.indexOf("手机号不存在") > -1) {
-          this.phoneErr = "手机号未在系统登记";
-        } else {
-          wx.showToast({
-            title: res.message,
-            icon: "none",
-            duration: 2000
-          });
+          this.verifyCodeTimer = setInterval(() => {
+            this.setTimeCut();
+          }, 1000);
+        } else if (res && res.message) {
+          if (res.message.indexOf("手机号不存在") > -1) {
+            this.phoneErr = "手机号未在系统登记";
+          } else {
+            wx.showToast({
+              title: res.message,
+              icon: "none",
+              duration: 2000
+            });
+          }
+          this.isVerifyCodeClick = false;
         }
-        this.isVerifyCodeClick = false;
-      } else {
+      } catch(err) {
+        console.log(err);
         this.isVerifyCodeClick = false;
       }
     },
@@ -169,25 +172,30 @@ export default {
         return;
       }
       this.isSubmitClick = true;
-      const code = await this.getCode();
-      const res = await api.login(phone, verifyCode, code);
-      if (res && res.code === 200) {
-        this.setLoginStatus(true);
-        this.setLoginInfo(res.data);
-        wx.setStorageSync("LOGIN_INFO", JSON.stringify(res.data));
-        this.jumpPage("home", "switchTab");
-      } else if (res && res.message) {
-        if (res.message.indexOf("验证码") > -1) {
-          this.vcErr = res.message;
-        } else {
-          wx.showToast({
-            title: res.message,
-            icon: "none",
-            duration: 2000
-          });
+      try {
+        const code = await this.getCode();
+        const res = await api.login(phone, verifyCode, code);
+        if (res && res.code === 200) {
+          this.setLoginStatus(true);
+          this.setLoginInfo(res.data);
+          wx.setStorageSync("LOGIN_INFO", JSON.stringify(res.data));
+          this.jumpPage("home", "switchTab");
+        } else if (res && res.message) {
+          if (res.message.indexOf("验证码") > -1) {
+            this.vcErr = res.message;
+          } else {
+            wx.showToast({
+              title: res.message,
+              icon: "none",
+              duration: 2000
+            });
+          }
         }
+        this.isSubmitClick = false;
+      } catch (err) {
+        console.log(err);
+        this.isSubmitClick = false;
       }
-      this.isSubmitClick = false;
     },
     clearErr() {
       this.phoneErr = "";

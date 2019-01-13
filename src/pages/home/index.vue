@@ -165,7 +165,7 @@ export default {
       const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null;
       this.isUpLoading = true;
       const uploadTask = wx.uploadFile({
-        url: `${config.host}/testApi/file/upload`,
+        url: `${config.host}/wxApi/file/upload`,
         filePath: params.picture,
         name: "file",
         header: {

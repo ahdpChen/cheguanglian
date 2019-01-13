@@ -6,8 +6,8 @@ const requestConfigs = {
     uploadFileHost: 'api.cheguanglian.com:8080'
   },
   production: {
-    host: 'http://api.cheguanglian.com',
-    uploadFileHost: 'api.cheguanglian.com'
+    host: 'https://api.cheguangjia.com',
+    uploadFileHost: 'api.cheguangjia.com'
   }
 }
 const appid = 'wxa49d31e926e524c7'

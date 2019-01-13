@@ -40,12 +40,12 @@ const post = (params) => {
  * @param {*} picture
  */
 // const upLoadFile = params => {
-//   // return fly.post('/testApi/file/upload', utils.json2Form(params))
+//   // return fly.post('/wxApi/file/upload', utils.json2Form(params))
 //   const loginInfoStr = wx.getStorageSync('LOGIN_INFO')
 //   const loginInfo = loginInfoStr ? JSON.parse(loginInfoStr) : null
 //   if (loginInfo) {
 //     return wx.uploadFile({
-//       url: `${host}/testApi/file/upload`,
+//       url: `${host}/wxApi/file/upload`,
 //       filePath: params.picture,
 //       name: 'file',
 //       header: {
@@ -71,7 +71,7 @@ const post = (params) => {
 
 // 获取验证码
 const getMsCode = phoneNumber => {
-  return fly.get('/testApi/smCode', qs.stringify({ mPhone: phoneNumber }), {
+  return fly.get('/wxApi/smCode', qs.stringify({ mPhone: phoneNumber }), {
     extra: {
       auth: false
     }
@@ -85,7 +85,7 @@ const getMsCode = phoneNumber => {
  * @param {*} smCode 后台根据手机号获取
  */
 const login = (userphone, smCode, code) => {
-  return fly.post('/testApi/auth', qs.stringify({ account: userphone, code, smCode }), {
+  return fly.post('/wxApi/auth', qs.stringify({ account: userphone, code, smCode }), {
     extra: {
       auth: false
     }
@@ -94,12 +94,12 @@ const login = (userphone, smCode, code) => {
 
 // 首页-获取广告下拉列表
 const getSelAd = () => {
-  return fly.get('/testApi/ad/getSelAd')
+  return fly.get('/wxApi/ad/getSelAd')
 }
 
 // 首页-选择车牌和广告后校验是否有效
 const validConstr = (detail) => {
-  return fly.get('/testApi/ad/validConstr', `detail=${JSON.stringify(detail)}`)
+  return fly.get('/wxApi/ad/validConstr', `detail=${JSON.stringify(detail)}`)
 }
 
 // 首页-添加广告施工
@@ -117,22 +117,22 @@ const validConstr = (detail) => {
  * }
  */
 const addConstruction = (params) => {
-  return fly.post('/testApi/ad/addConstruction', `detail=${JSON.stringify(params.detail)}&picList=${JSON.stringify(params.picList)}`)
+  return fly.post('/wxApi/ad/addConstruction', `detail=${JSON.stringify(params.detail)}&picList=${JSON.stringify(params.picList)}`)
 }
 
 // 我的-获取一级权限用户的基本信息
 const getUserBaseInfo = () => {
-  return fly.get('/testApi/user/userBaseInfo')
+  return fly.get('/wxApi/user/userBaseInfo')
 }
 
 // 账户设置-获取一级权限用户下所属的员工列表
 const getEmployees = () => {
-  return fly.get('/testApi/user/getEmployees')
+  return fly.get('/wxApi/user/getEmployees')
 }
 
 // 员工账户-删除员工
 const deleteEmployee = (id) => {
-  return fly.post('/testApi/user/delete', qs.stringify({ id }))
+  return fly.post('/wxApi/user/delete', qs.stringify({ id }))
 }
 
 // 员工账户-新增或修改员工
@@ -145,7 +145,7 @@ const deleteEmployee = (id) => {
  * }
  */
 const editEmployee = (params) => {
-  return fly.post('/testApi/user/addOrUpdte', qs.stringify(params))
+  return fly.post('/wxApi/user/addOrUpdte', qs.stringify(params))
 }
 
 /**
@@ -155,22 +155,22 @@ const editEmployee = (params) => {
  * @param {*} limit (一页条数)
  */
 const accountDetail = (type, offset, limit) => {
-  return fly.get('/testApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
+  return fly.get('/wxApi/user/selectPageAccountDetail', qs.stringify({ type, offset, limit }))
 }
 
 // 提现-提现申请页面 返回银行卡信息和可用额度
 const getAmountAndBankCarInfo = () => {
-  return fly.get('/testApi/user/withdrawaApply_page')
+  return fly.get('/wxApi/user/withdrawaApply_page')
 }
 
 // 提现-添加或修改银行卡信息
 const addBankInfo = (bankName, bankNo) => {
-  return fly.post('/testApi/user/addBankInfo', `bankName=${bankName}&bankNo=${bankNo}`)
+  return fly.post('/wxApi/user/addBankInfo', `bankName=${bankName}&bankNo=${bankNo}`)
 }
 
 // 提现-发起提现请求
 const doDepositSubmit = (amount) => {
-  return fly.post('/testApi/user/withdrawaApply', qs.stringify({ amount }))
+  return fly.post('/wxApi/user/withdrawaApply', qs.stringify({ amount }))
 }
 
 /**
@@ -183,18 +183,18 @@ const doDepositSubmit = (amount) => {
  * carNumber (车牌号)
  */
 const getAdvertList = (params) => {
-  return fly.get('/testApi/user/selectPageConstrsOrder', qs.stringify(params))
+  return fly.get('/wxApi/user/selectPageConstrsOrder', qs.stringify(params))
 }
 
 // 广告情况-洗车店已施工的广告
 const getAdListByCarNumber = (carNumber) => {
-  return fly.get('/testApi/user/selectAdListByCarNumber', qs.stringify({carNumber}))
+  return fly.get('/wxApi/user/selectAdListByCarNumber', qs.stringify({carNumber}))
 }
 
 // 广告情况-广告施工详情
 
 const getAdDetail = (id) => {
-  return fly.get('/testApi/ad/getConstrAdDetail', qs.stringify({id}))
+  return fly.get('/wxApi/ad/getConstrAdDetail', qs.stringify({id}))
 }
 
 export default {
