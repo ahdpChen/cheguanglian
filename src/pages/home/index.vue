@@ -698,6 +698,7 @@ export default {
         width: 14px;
         height: 8px;
         background: url("./images/arrow.png") center/100% no-repeat;
+        transform: rotate(180deg);
       }
     }
   }
