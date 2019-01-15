@@ -57,7 +57,7 @@ export default {
   background: #545dff;
   .logo {
     width: 180px;
-    height: 47px;
+    height: 73px;
     background: url("./images/Union.png") center/100% no-repeat;
   }
   .copy-right {
